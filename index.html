@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NumberFinder - ที่มาของตัวเลข</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fafbfe; --panel:#ffffff; --border:#eef0f5;
+    --ink:#2b2f3a; --muted:#9098a8;
+    --primary:#5b6cff; --primary-soft:#eef0ff;
+    --pink:#ff5ba0;   --pink-soft:#ffeaf3;
+    --amber:#ffab2e;  --amber-soft:#fff4e2;
+    --teal:#17c3b2;   --teal-soft:#e4faf7;
+    --violet:#9b6bff; --violet-soft:#f2ebff;
+    --sky:#2ec4ff;    --sky-soft:#e5f8ff;
+    --green:#2ecc71;  --green-soft:#e8faf0;
+    --red:#ff5c72;    --red-soft:#ffeef0;
+    --shadow:0 4px 18px rgba(60,70,110,0.06);
+  }
+  body.dark{
+    --bg:#000000; --panel:#0a0a0a; --border:#232323;
+    --ink:#f0f0f0; --muted:#8a8a8a;
+    --primary:#7b8bff; --primary-soft:#14141f;
+    --pink:#ff7bb5;   --pink-soft:#1f1218;
+    --amber:#ffc266;  --amber-soft:#1f1a10;
+    --teal:#3fd9c7;   --teal-soft:#0d1a18;
+    --violet:#b28dff; --violet-soft:#16121f;
+    --sky:#5cd2ff;    --sky-soft:#0c161c;
+    --green:#4fe28f;  --green-soft:#0d1a12;
+    --red:#ff7d90;    --red-soft:#1f1013;
+    --shadow:0 4px 18px rgba(0,0,0,0.6);
+  }
+  body.dark input[type=number], body.dark select{ background:#0f0f0f; color:var(--ink); }
+  body.dark input[type=number]:focus, body.dark select:focus{ background:#141414; }
+  *{box-sizing:border-box; font-family:"Mali","Segoe UI",sans-serif;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    padding:20px; transition:background .25s, color .25s;
+  }
+  .layout{ display:block; max-width:900px; margin:0 auto; }
+
+  .topbar{
+    max-width:900px; margin:0 auto 18px auto; display:flex; align-items:center;
+    justify-content:space-between; gap:12px;
+  }
+  .tabs{ display:flex; gap:8px; background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; padding:5px; box-shadow:var(--shadow); }
+  .tab-btn{
+    border:none; background:transparent; padding:9px 16px; border-radius:10px;
+    font-size:0.92rem; font-weight:700; color:var(--muted); cursor:pointer;
+    display:flex; align-items:center; gap:6px; transition:background .15s,color .15s;
+  }
+  .tab-btn.active{ background:var(--primary); color:#fff; }
+  .tab-count{
+    background:rgba(255,255,255,0.25); font-size:0.7rem; padding:1px 7px; border-radius:20px;
+  }
+  .tab-btn:not(.active) .tab-count{ background:var(--red-soft); color:var(--red); }
+  .theme-toggle{
+    border:none; background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow);
+    width:42px; height:42px; border-radius:12px; font-size:1.15rem; cursor:pointer;
+  }
+  .tab-panel{ max-width:900px; margin:0 auto; }
+  @media (min-width:900px){ .topbar, .tab-panel{ max-width:1400px; } }
+
+  .history-wrap{
+    background:var(--panel); border:1px solid var(--border); border-radius:20px;
+    padding:22px; box-shadow:var(--shadow);
+  }
+  .history-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .clear-btn{
+    border:none; background:var(--red-soft); color:var(--red); font-weight:700;
+    padding:8px 14px; border-radius:10px; cursor:pointer; font-size:0.82rem;
+  }
+  .hint-msg{ font-size:0.78rem; color:var(--muted); margin-bottom:16px; }
+  .history-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 16px; border-radius:12px; background:var(--primary-soft);
+    margin-bottom:8px; cursor:pointer; transition:transform .1s;
+  }
+  .history-item:active{ transform:scale(0.98); }
+  .history-item .h-num{ font-weight:800; font-size:1.15rem; color:var(--ink); }
+  .history-item .h-meta{ font-size:0.75rem; color:var(--muted); }
+  .history-item .h-time{ font-size:0.72rem; color:var(--muted); white-space:nowrap; }
+  .history-empty{ text-align:center; color:var(--muted); padding:30px 10px; font-size:0.9rem; }
+
+  .panel-left{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:20px; padding:22px; box-shadow:var(--shadow);
+    width:100%; margin-bottom:20px;
+  }
+  .panel-right{ width:100%; }
+
+  @media (min-width:900px){
+    .layout{ display:flex; gap:20px; max-width:1400px; align-items:flex-start; }
+    .panel-left{ flex:0 0 290px; width:290px; position:sticky; top:20px; margin-bottom:0; }
+    .panel-right{ flex:1; min-width:300px; }
+  }
+  h2.title{
+    display:flex; align-items:center; gap:8px; font-size:1.15rem; font-weight:800;
+    margin:0 0 20px 0; color:var(--primary);
+  }
+  label{ display:block; font-size:0.8rem; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  input[type=number]{
+    width:100%; padding:13px 16px; border-radius:14px; border:2px solid var(--border);
+    background:#f8f9fd; font-size:1.15rem; margin-bottom:16px; outline:none; color:var(--ink);
+    font-weight:700; transition:border-color .15s;
+  }
+  input[type=number]:focus{ border-color:var(--primary); background:#fff; }
+  select{
+    width:100%; padding:13px 16px; border-radius:14px; border:2px solid var(--border);
+    background:#f8f9fd; font-size:1rem; margin-bottom:18px; outline:none; color:var(--ink);
+    font-weight:600;
+  }
+  select:focus{ border-color:var(--primary); background:#fff; }
+  .quick{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:20px; }
+  .quick span{
+    background:var(--primary-soft); color:var(--primary); padding:6px 13px; border-radius:20px;
+    font-size:0.8rem; cursor:pointer; font-weight:700; transition:transform .1s;
+  }
+  .quick span:active{ transform:scale(0.94); }
+  button.search{
+    width:100%; padding:15px; border:none; border-radius:14px;
+    background:linear-gradient(135deg,var(--primary),#7b6bff); color:#fff; font-size:1.02rem;
+    font-weight:800; cursor:pointer; box-shadow:0 6px 16px rgba(91,108,255,0.35);
+  }
+  button.search:active{ transform:scale(0.98); }
+  .cond{
+    margin-top:22px; background:var(--primary-soft); border-radius:16px; padding:16px 18px;
+    font-size:0.85rem; color:var(--ink); line-height:1.8; font-weight:600;
+  }
+  .cond b{ display:block; color:var(--primary); margin-bottom:8px; font-size:0.92rem; }
+  .cond ul{ margin:0; padding-left:18px; }
+
+  h2.results-title{ font-size:1.6rem; font-weight:800; color:var(--ink); margin:0 0 14px 4px; }
+  h2.results-title span{ color:var(--pink); font-weight:800; }
+  .status-bar{
+    background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow);
+    border-radius:14px; padding:13px 18px; text-align:center;
+    font-size:0.92rem; color:var(--ink); font-weight:600; margin-bottom:18px;
+  }
+  .status-bar b{ color:var(--primary); }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:16px; }
+
+  .section{
+    background:var(--panel); border:1px solid var(--border); border-radius:18px;
+    padding:18px 20px; box-shadow:var(--shadow);
+  }
+  .section.empty{ opacity:0.6; }
+  .section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .section-head .name{ font-weight:800; font-size:0.95rem; display:flex; gap:8px; align-items:center; }
+  .icon-badge{
+    width:30px; height:30px; border-radius:10px; display:flex; align-items:center;
+    justify-content:center; font-size:1rem; flex:none;
+  }
+  .badge{ font-size:0.72rem; font-weight:800; padding:4px 11px; border-radius:20px; white-space:nowrap; }
+  .badge.count{ background:var(--green-soft); color:#1e9e56; }
+  .badge.empty{ background:var(--red-soft); color:#d1435a; }
+
+  .item-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 12px; margin-bottom:6px; border-radius:10px; font-size:1rem;
+    background:var(--primary-soft);
+  }
+  .item-row:last-child{ margin-bottom:0; }
+  .item-row .expr{ font-weight:700; color:var(--ink); }
+  .empty-msg{ font-size:0.85rem; color:var(--muted); padding:4px 2px; }
+
+  /* สีเฉพาะแต่ละหมวด */
+  .c-mult .icon-badge{ background:var(--sky-soft); }
+  .c-mult .item-row{ background:var(--sky-soft); }
+  .c-mult .name{ color:var(--sky); }
+
+  .c-div .icon-badge{ background:var(--green-soft); }
+  .c-div .item-row{ background:var(--green-soft); }
+  .c-div .name{ color:var(--green); }
+
+  .c-pow .icon-badge{ background:var(--amber-soft); }
+  .c-pow .item-row{ background:var(--amber-soft); }
+  .c-pow .name{ color:var(--amber); }
+
+  .c-powm .icon-badge{ background:var(--violet-soft); }
+  .c-powm .item-row{ background:var(--violet-soft); }
+  .c-powm .name{ color:var(--violet); }
+
+  .c-sqrt .icon-badge{ background:var(--teal-soft); }
+  .c-sqrt .item-row{ background:var(--teal-soft); }
+  .c-sqrt .name{ color:var(--teal); }
+
+  .c-fact .icon-badge{ background:var(--pink-soft); }
+  .c-fact .item-row{ background:var(--pink-soft); }
+  .c-fact .name{ color:var(--pink); }
+
+  .c-sigma{ background:linear-gradient(180deg,var(--primary-soft),var(--panel)); border-color:var(--border); }
+  .c-sigma .icon-badge{ background:var(--primary-soft); }
+  .c-sigma .name{ color:var(--primary); }
+
+  .sigma-tag{
+    font-size:0.7rem; font-weight:800; color:var(--green); background:var(--green-soft);
+    padding:2px 9px; border-radius:20px; display:inline-block; margin-bottom:8px;
+  }
+
+  .sigma-wrap{ margin-bottom:12px; }
+  .sigma-wrap:last-child{ margin-bottom:0; }
+  .sigma-item{
+    display:flex; align-items:center; gap:16px; padding:16px 18px;
+    border-radius:14px; background:var(--panel); border:1px solid var(--border);
+    box-shadow:0 2px 10px rgba(91,108,255,0.08);
+  }
+  .sigma-symbol{
+    display:inline-flex; flex-direction:column; align-items:center;
+    line-height:1.1; flex:none; min-width:38px;
+  }
+  .sig-top{ font-size:0.78rem; font-weight:800; color:var(--ink); font-style:italic; }
+  .sig-big{ font-size:2.1rem; color:var(--primary); font-weight:400; margin:1px 0; }
+  .sig-bottom{ font-size:0.7rem; font-weight:700; color:var(--ink); font-style:italic; white-space:nowrap; }
+  .sigma-term{ font-size:1.2rem; color:var(--ink); font-weight:700; }
+  .sigma-eq{ font-size:1.2rem; color:var(--ink); font-weight:700; }
+  .sigma-val{ font-size:1.35rem; font-weight:800; color:var(--primary); margin-left:auto; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tabs">
+    <button class="tab-btn active" id="tabSearchBtn" onclick="showTab('search')">🔍 ค้นหา</button>
+    <button class="tab-btn" id="tabHistoryBtn" onclick="showTab('history')">🕘 ประวัติ <span id="historyCount" class="tab-count" style="display:none;">0</span></button>
+  </div>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="สลับโหมดมืด/สว่าง">🌙</button>
+</div>
+
+<div id="tabSearch" class="tab-panel">
+<div class="layout">
+
+  <div class="panel-left">
+    <h2 class="title">🔍 ค้นหาตัวเลข</h2>
+
+    <label>ใส่ตัวเลขที่ต้องการ (1 - 1,000)</label>
+    <input type="number" id="numInput" value="0">
+
+    <div class="quick" id="quickPicks"></div>
+
+    <label>เลือกระดับการค้นหา</label>
+    <select id="levelSelect">
+      <option value="1">Lv.1 </option>
+      <option value="2">Lv.2 </option>
+      <option value="3" selected>Lv.3 </option>
+    </select>
+
+    <button class="search" onclick="explore()">ค้นหา</button>
+
+    <div class="cond">
+      <b>ข้อมูลระบบ</b>
+      <ul>
+        <li>ตารางสูตรคูณ แม่ 2-30 (×1-12)</li>
+        <li>ตารางเลขยกกำลัง / ยกกำลังคูณ</li>
+        <li>ตารางรากที่สอง / กำลังสอง-สาม</li>
+        <li>ตารางแฟคทอเรียล และ แฟคหาร</li>
+        <li>สูตรซิกม่าทุกแบบ (Σi, Σi², ฯลฯ)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <h2 class="results-title">ที่มาของ <span id="targetTitle">64</span></h2>
+    <div id="statusBar" class="status-bar"></div>
+    <div id="results"></div>
+  </div>
+
+</div>
+</div>
+
+<div id="tabHistory" class="tab-panel" style="display:none;">
+  <div class="history-wrap">
+    <div class="history-head">
+      <h2 class="results-title" style="margin:0;">🕘 ประวัติการค้นหา</h2>
+      <button class="clear-btn" onclick="clearHistory()">ล้างประวัติ</button>
+    </div>
+    <div class="hint-msg">* บันทึกประวัติการค้นหาอัตโนมัติด้วย Local Storage</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<script>
+const quicks = [50, 100, 200, 400, 500, 800, 900, 1000];
+const qEl = document.getElementById('quickPicks');
+quicks.forEach(n=>{
+  const s = document.createElement('span');
+  s.textContent = n;
+  s.onclick = ()=>{ document.getElementById('numInput').value = n; explore(); };
+  qEl.appendChild(s);
+});
+
+function factorial(n){
+  if(n<0) return NaN;
+  if(n>170) return Infinity; 
+  let r=1;
+  for(let x=2;x<=n;x++){
+    r*=x;
+    if(!isFinite(r)) return Infinity;
+  }
+  return r;
+}
+
+/* ---------- 1) ตารางสูตรคูณ แม่ 2-30 (×1-12) ---------- */
+function checkMultiplicationTable(n){
+  const res = [];
+  for(let m=2; m<=30; m++){
+    for(let x=1; x<=12; x++){
+      if(m*x === n) res.push(`${m} × ${x}`);
+    }
+  }
+  return res;
+}
+
+/* ---------- 1b) การหารธรรมดา (÷) — แก้ไขให้ผลลัพธ์เท่ากับตัวที่หา (n) ---------- */
+function checkDivision(n){
+  const res = [];
+  // วนลูปหาคู่ตัวเลขที่หารกันแล้วได้ผลลัพธ์เท่ากับ n (เช่น a ÷ b = n  หรือ a = b * n)
+  // โดยให้ตัวตั้ง (a) ไม่เกิน 10,000 เพื่อไม่ให้ตัวเลขเยอะเกินไป
+  for(let b = 1; b <= 50; b++){
+    const a = n * b;
+    if(a <= 10000) {
+      res.push(`${a} ÷ ${b} = ${n}`);
+    }
+  }
+  return res.slice(0, 10); // จำกัดแสดงผลไม่เกิน 10 แบบ
+}
+
+
+/* ---------- 2) ตารางเลขยกกำลัง และ ยกกำลังคูณ ---------- */
+function checkPowerTable(n){
+  const res = [];
+  for(let base=2; base<=10; base++){
+    for(let exp=2; exp<=10; exp++){
+      if(Math.pow(base,exp) === n) res.push(`${base}^${exp}`);
+    }
+  }
+  for(let b=11; b<=32; b++){
+    if(b*b === n) res.push(`${b}²`);
+  }
+  return [...new Set(res)];
+}
+
+function checkPowerMultiplyTable(n){
+  const res = [];
+  const ranges = {2:8, 3:6, 4:5, 5:4, 6:4, 7:4, 8:4, 9:4};
+  for(const base in ranges){
+    const maxP = ranges[base];
+    for(let p=1; p<=maxP; p++){
+      const basePow = Math.pow(Number(base), p);
+      for(let x=1; x<=12; x++){
+        if(basePow*x === n) res.push(`${base}^${p} × ${x}`);
+      }
+    }
+  }
+  return res;
+}
+
+/* ---------- 3) รากที่สอง / กำลังสอง-สาม ---------- */
+function checkSquareRoot(n){
+  const res = [];
+  const sq = Math.sqrt(n);
+  if(Number.isInteger(sq)) res.push(`√${n} = ${sq} (${sq}² = ${n})`);
+  const cbRound = Math.round(Math.cbrt(n));
+  if(cbRound*cbRound*cbRound === n) res.push(`${cbRound}³ = ${n}`);
+  return res;
+}
+
+/* ---------- 4) แฟคทอเรียล (!) ---------- */
+function checkFactorialPure(n){
+  const res = [];
+  for(let a=0;a<=9;a++){
+    if(factorial(a) === n) res.push(`${a}!`);
+  }
+  return res;
+}
+
+/* ---------- 4b) แฟคหาร ---------- */
+function checkFactorialDivision(n){
+  const res = [];
+  const fact = [];
+  for(let i=0;i<=9;i++) fact.push(factorial(i));
+  for(let a=2;a<=9;a++){
+    for(let m=1;m<=fact[a];m++){
+      if(fact[a] % m === 0 && fact[a]/m === n && m>1){
+        res.push(`${a}! ÷ ${m}`);
+      }
+    }
+    for(let b=1;b<a;b++){
+      if(fact[a]/fact[b] === n) res.push(`${a}! ÷ ${b}!`);
+    }
+  }
+  return [...new Set(res)].slice(0,8);
+}
+
+/* ---------- 5) สูตรซิกม่าทั้งหมด ---------- */
+const SIGMA_MAX = 50;
+const sigmaFormulas = [
+  {label:'Σi',              sym:'i',        term:i=>i},
+  {label:'Σ(i+i)',          sym:'i+i',      term:i=>2*i},
+  {label:'Σ(i×i)',          sym:'i×i',      term:i=>i*i},
+  {label:'Σ(i!/i)',         sym:'i!/i',     term:i=>i>=1?factorial(i-1):NaN},
+  {label:'Σ(i!−i)',         sym:'i!−i',     term:i=>factorial(i)-i},
+  {label:'Σ(i!+i!)',        sym:'i!+i!',    term:i=>2*factorial(i)},
+  {label:'Σ(i!×i!)',        sym:'i!×i!',    term:i=>Math.pow(factorial(i),2)},
+  {label:'Σ(i+i)!',         sym:'(i+i)!',   term:i=>factorial(2*i)},
+  {label:'Σ i^i',           sym:'iⁱ',       term:i=>Math.pow(i,i)},
+  {label:'Σ i^(i!)',        sym:'i^(i!)',   term:i=>Math.pow(i,factorial(i))},
+  {label:'Σ (i!)^(i!)',     sym:'(i!)^(i!)',term:i=>Math.pow(factorial(i),factorial(i))},
+  {label:'Σ (i!)!',         sym:'(i!)!',    term:i=>factorial(factorial(i))},
+  {label:'Σ ((i!)!+i)',     sym:'(i!)!+i',  term:i=>factorial(factorial(i))+i},
+  {label:'Σ ((i!)!−i)',     sym:'(i!)!−i',  term:i=>factorial(factorial(i))-i},
+  {label:'Σ (i!−i)!',       sym:'(i!−i)!',  term:i=>factorial(factorial(i)-i)},
+];
+for(let base=2; base<=9; base++){
+  sigmaFormulas.push({ label:`Σ (${base}^i)`, sym:`${base}ⁱ`, term:(i)=>Math.pow(base,i) });
+}
+sigmaFormulas.forEach(f=> f.maxI = SIGMA_MAX);
+
+function checkSigma(n){
+  const res = [];
+  const CAP = 1e15;
+  sigmaFormulas.forEach(f=>{
+    for(let k=1; k<=f.maxI; k++){
+      let sum = 0;
+      for(let m=k; m<=f.maxI; m++){
+        const t = f.term(m);
+        if(!isFinite(t) || Math.abs(t) > CAP) break;
+        sum += t;
+        if(Math.abs(sum) > CAP) break;
+        if(sum === n){
+          res.push({sym:f.sym, k, m, target:n});
+        }
+        if(sum > n && t >= 0){ break; }
+      }
+    }
+  });
+  return res.slice(0, 10);
+}
+
+/* ---------- Render ---------- */
+function renderSigmaItem(it){
+  return `
+    <div class="sigma-wrap">
+      <span class="sigma-tag">✅ พบคำตอบ</span>
+      <div class="sigma-item">
+        <div class="sigma-symbol">
+          <span class="sig-top">${it.m}</span>
+          <span class="sig-big">Σ</span>
+          <span class="sig-bottom">i=${it.k}</span>
+        </div>
+        <div class="sigma-term">(${it.sym})</div>
+        <div class="sigma-eq">=</div>
+        <div class="sigma-val">${it.target.toLocaleString('en-US')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSection(name, icon, items, colorClass, isSigma){
+  const found = items.length > 0;
+  let html = `<div class="section ${colorClass} ${found?'':'empty'}">
+    <div class="section-head">
+      <div class="name"><span class="icon-badge">${icon}</span> ${name}</div>
+      <div class="badge ${found?'count':'empty'}">${found? items.length+' แบบ' : 'ไม่พบ'}</div>
+    </div>`;
+  if(found){
+    if(isSigma){
+      items.forEach(it=>{ html += renderSigmaItem(it); });
+    } else {
+      items.forEach(it=>{
+        html += `<div class="item-row"><span class="expr">${it}</span></div>`;
+      });
+    }
+  } else {
+    html += `<div class="empty-msg">ไม่พบรูปแบบนี้ในตาราง</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function explore(){
+  const n = parseInt(document.getElementById('numInput').value);
+  const level = document.getElementById('levelSelect').value;
+  const resultsEl = document.getElementById('results');
+  const statusEl = document.getElementById('statusBar');
+  const titleEl = document.getElementById('targetTitle');
+
+  if(!n || n < 1 || n > 1000){
+    statusEl.textContent = '⚠️ กรุณาใส่ตัวเลขระหว่าง 1 ถึง 1,000';
+    resultsEl.innerHTML = '';
+    titleEl.textContent = '-';
+    return;
+  }
+
+  titleEl.textContent = n;
+
+  const mult   = checkMultiplicationTable(n);
+  const divc   = checkDivision(n);
+  const pow    = checkPowerTable(n);
+  const powm   = checkPowerMultiplyTable(n);
+  const sqrtc  = level >= 2 ? checkSquareRoot(n) : [];
+  const factc  = level >= 3 ? checkFactorialPure(n) : [];
+  const factdc = level >= 3 ? checkFactorialDivision(n) : [];
+  const sigmac = level >= 3 ? checkSigma(n) : [];
+
+  const sections = [
+    {name:'แม่สูตรคูณ (แม่ 2-30 × 1-12)', icon:'✖️', items:mult,  cls:'c-mult'},
+    {name:'การหาร (÷)', icon:'➗', items:divc, cls:'c-div'},
+    {name:'เลขยกกำลัง (aᵇ)', icon:'⚡', items:pow, cls:'c-pow'},
+    {name:'ยกกำลังคูณ (baseᵖ × x)', icon:'⚡✖️', items:powm, cls:'c-powm'},
+  ];
+  if(level >= 2){
+    sections.push({name:'รากที่สอง / กำลังสาม', icon:'🔲', items:sqrtc, cls:'c-sqrt'});
+  }
+  if(level >= 3){
+    sections.push({name:'แฟคทอเรียล (n!)', icon:'❗', items:factc, cls:'c-fact'});
+    sections.push({name:'แฟคหาร (n! ÷ ตัวเลข / แฟคทอเรียล)', icon:'❗➗', items:factdc, cls:'c-fact'});
+    sections.push({name:'สูตรซิกม่า (Σ) — i ไม่เกิน 50', icon:'Σ', items:sigmac, cls:'c-sigma', sigma:true});
+  }
+
+  const totalFound = sections.filter(s=>s.items.length>0).length;
+  statusEl.innerHTML = `ตรวจ <b>${sections.length}</b> หมวด (Lv.${level}) — พบที่มาใน <b>${totalFound}</b> หมวด`;
+
+  let html = '<div class="grid">';
+  sections.forEach(s=>{
+    html += renderSection(s.name, s.icon, s.items, s.cls, !!s.sigma);
+  });
+  html += '</div>';
+
+  resultsEl.innerHTML = html;
+
+  addToHistory(n, level, totalFound, sections.length);
+}
+
+/* ---------- แท็บ ---------- */
+function showTab(tab){
+  const isSearch = tab === 'search';
+  document.getElementById('tabSearch').style.display = isSearch ? '' : 'none';
+  document.getElementById('tabHistory').style.display = isSearch ? 'none' : '';
+  document.getElementById('tabSearchBtn').classList.toggle('active', isSearch);
+  document.getElementById('tabHistoryBtn').classList.toggle('active', !isSearch);
+  if(!isSearch) renderHistory();
+}
+
+/* ---------- โหมดมืด ---------- */
+function toggleTheme(){
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = dark ? '☀️' : '🌙';
+}
+
+/* ---------- ประวัติการค้นหา (Local Storage) ---------- */
+let searchHistory = JSON.parse(localStorage.getItem('numberFinderHistory')) || [];
+
+function updateHistoryBadge(){
+  const countEl = document.getElementById('historyCount');
+  countEl.textContent = searchHistory.length;
+  countEl.style.display = searchHistory.length > 0 ? 'inline-block' : 'none';
+}
+updateHistoryBadge();
+
+function addToHistory(n, level, foundCount, totalSections){
+  const last = searchHistory[0];
+  if(last && last.n === n && last.level === level) return;
+  
+  searchHistory.unshift({
+    n, level, foundCount, totalSections,
+    time: new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})
+  });
+  
+  if(searchHistory.length > 30) searchHistory.pop();
+  
+  localStorage.setItem('numberFinderHistory', JSON.stringify(searchHistory));
+  updateHistoryBadge();
+}
+
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(searchHistory.length === 0){
+    el.innerHTML = `<div class="history-empty">ยังไม่มีประวัติการค้นหา</div>`;
+    return;
+  }
+  el.innerHTML = searchHistory.map((h,idx)=>`
+    <div class="history-item" onclick="loadFromHistory(${idx})">
+      <div>
+        <div class="h-num">${h.n.toLocaleString('en-US')}</div>
+        <div class="h-meta">Lv.${h.level} • พบที่มา ${h.foundCount}/${h.totalSections} หมวด</div>
+      </div>
+      <div class="h-time">${h.time}</div>
+    </div>
+  `).join('');
+}
+
+function loadFromHistory(idx){
+  const h = searchHistory[idx];
+  if(!h) return;
+  document.getElementById('numInput').value = h.n;
+  document.getElementById('levelSelect').value = h.level;
+  showTab('search');
+  explore();
+}
+
+function clearHistory(){
+  searchHistory = [];
+  localStorage.removeItem('numberFinderHistory');
+  updateHistoryBadge();
+  renderHistory();
+}
+
+explore();
+</script>
+</body>
+</html>
