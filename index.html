@@ -34,8 +34,8 @@
     --red:#ff7d90;    --red-soft:#1f1013;
     --shadow:0 4px 18px rgba(0,0,0,0.6);
   }
-  body.dark input[type=number], body.dark select{ background:#0f0f0f; color:var(--ink); }
-  body.dark input[type=number]:focus, body.dark select:focus{ background:#141414; }
+  body.dark input[type=number], body.dark input[type=text], body.dark select{ background:#0f0f0f; color:var(--ink); }
+  body.dark input[type=number]:focus, body.dark input[type=text]:focus, body.dark select:focus{ background:#141414; }
   *{box-sizing:border-box; font-family:"Mali","Segoe UI",sans-serif;}
   body{
     margin:0; background:var(--bg); color:var(--ink);
@@ -45,10 +45,10 @@
 
   .topbar{
     max-width:900px; margin:0 auto 18px auto; display:flex; align-items:center;
-    justify-content:space-between; gap:12px;
+    justify-content:space-between; gap:12px; flex-wrap:wrap;
   }
   .tabs{ display:flex; gap:8px; background:var(--panel); border:1px solid var(--border);
-    border-radius:14px; padding:5px; box-shadow:var(--shadow); }
+    border-radius:14px; padding:5px; box-shadow:var(--shadow); flex-wrap:wrap; }
   .tab-btn{
     border:none; background:transparent; padding:9px 16px; border-radius:10px;
     font-size:0.92rem; font-weight:700; color:var(--muted); cursor:pointer;
@@ -104,12 +104,12 @@
     margin:0 0 20px 0; color:var(--primary);
   }
   label{ display:block; font-size:0.8rem; color:var(--muted); margin-bottom:6px; font-weight:600; }
-  input[type=number]{
+  input[type=number], input[type=text]{
     width:100%; padding:13px 16px; border-radius:14px; border:2px solid var(--border);
     background:#f8f9fd; font-size:1.15rem; margin-bottom:16px; outline:none; color:var(--ink);
     font-weight:700; transition:border-color .15s;
   }
-  input[type=number]:focus{ border-color:var(--primary); background:#fff; }
+  input[type=number]:focus, input[type=text]:focus{ border-color:var(--primary); background:#fff; }
   select{
     width:100%; padding:13px 16px; border-radius:14px; border:2px solid var(--border);
     background:#f8f9fd; font-size:1rem; margin-bottom:18px; outline:none; color:var(--ink);
@@ -221,6 +221,33 @@
   .sigma-term{ font-size:1.2rem; color:var(--ink); font-weight:700; }
   .sigma-eq{ font-size:1.2rem; color:var(--ink); font-weight:700; }
   .sigma-val{ font-size:1.35rem; font-weight:800; color:var(--primary); margin-left:auto; }
+
+  /* ---------- แท็บกำหนดเอง ---------- */
+  .digit-label{ font-size:0.85rem; color:var(--muted); font-weight:700; margin:0 0 10px 2px; }
+  .digit-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+  .digit-tile{
+    width:58px; height:58px; border-radius:14px; border:2px solid var(--border);
+    background:var(--panel); box-shadow:var(--shadow); display:flex; align-items:center;
+    justify-content:center; font-size:1.7rem; font-weight:800; color:var(--ink);
+  }
+  .answer-box{
+    background:var(--primary-soft); border-radius:16px; padding:22px; text-align:center;
+    font-size:2.1rem; font-weight:800; color:var(--primary); margin-bottom:18px;
+    border:1px solid var(--border);
+  }
+  .reveal-item{
+    padding:14px 16px; border-radius:12px; background:var(--green-soft);
+    margin-bottom:8px; font-size:1rem; font-weight:700; color:var(--ink); word-break:break-word;
+  }
+  .reveal-item:last-child{ margin-bottom:0; }
+  .solve-note{ font-size:0.75rem; color:var(--muted); margin-top:10px; text-align:center; }
+
+  .sigma-inline{ display:inline-flex; align-items:center; gap:2px; vertical-align:middle; margin:0 3px; }
+  .sigma-symbol-mini{ display:inline-flex; flex-direction:column; align-items:center; line-height:1; min-width:20px; }
+  .sig-top-mini{ font-size:0.55rem; font-weight:800; color:var(--ink); font-style:italic; }
+  .sig-big-mini{ font-size:1.3rem; color:var(--primary); font-weight:400; margin:-2px 0; }
+  .sig-bottom-mini{ font-size:0.5rem; font-weight:700; color:var(--ink); font-style:italic; white-space:nowrap; }
+  .sigma-term-mini{ font-weight:700; }
 </style>
 </head>
 <body>
@@ -228,6 +255,7 @@
 <div class="topbar">
   <div class="tabs">
     <button class="tab-btn active" id="tabSearchBtn" onclick="showTab('search')">🔍 ค้นหา</button>
+    <button class="tab-btn" id="tabCustomBtn" onclick="showTab('custom')">🤍วิธีคิด</button>
     <button class="tab-btn" id="tabHistoryBtn" onclick="showTab('history')">🕘 ประวัติ <span id="historyCount" class="tab-count" style="display:none;">0</span></button>
   </div>
   <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="สลับโหมดมืด/สว่าง">🌙</button>
@@ -269,6 +297,46 @@
     <h2 class="results-title">ที่มาของ <span id="targetTitle">64</span></h2>
     <div id="statusBar" class="status-bar"></div>
     <div id="results"></div>
+  </div>
+
+</div>
+</div>
+
+<div id="tabCustom" class="tab-panel" style="display:none;">
+<div class="layout">
+
+  <div class="panel-left">
+    <h2 class="title">💯วิธีคิด</h2>
+
+    <label>ใส่ตัวเลข 4-5 ตัว (คั่นด้วย , หรือเว้นวรรค)</label>
+    <input type="text" id="customNumbersInput" placeholder="เช่น 4,2,5,9,9">
+
+    <label>คำตอบที่ต้องการ</label>
+    <input type="number" id="customTargetInput" placeholder="เช่น 392">
+
+    <label>เลือกระดับการค้นหา</label>
+    <select id="customLevelSelect">
+      <option value="1">Lv.1 (+ − × ÷)</option>
+      <option value="2">Lv.2 (+ − × ÷ ^ √)</option>
+      <option value="3" selected>Lv.3 (+ − × ÷ ^ √ ! Σ)</option>
+    </select>
+
+    <button class="search" onclick="customSearch()">ค้นหาวิธีคิด</button>
+
+    <div class="cond">
+      <b>วิธีใช้งาน</b>
+      <ul>
+        <li>พิมพ์ตัวเลขที่มีอยู่ในมือ เช่น 4,2,5,9,9</li>
+        <li>ใส่คำตอบที่อยากได้ เช่น 392</li>
+        <li>ระบบจะลองรวม "ตัวเลขทั้งหมด" ด้วย + − × ÷ (และ ^ √ ! ตามเลเวลที่เลือก, Lv.3 รวมสูตรซิกม่า Σ ด้วย) จนกว่าจะได้คำตอบตรงกัน</li>
+        <li>กด "ดูวิธีคิด" เพื่อเผยสูตรที่เจอ</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <h2 class="results-title">โจทย์ของคุณ</h2>
+    <div id="customResults"></div>
   </div>
 
 </div>
@@ -538,14 +606,240 @@ function explore(){
   addToHistory(n, level, totalFound, sections.length);
 }
 
+/* =========================================================
+   แท็บ "กำหนดเอง" — ผู้ใช้พิมพ์ตัวเลขเองและคำตอบที่ต้องการ
+   ระบบจะลองรวมตัวเลขทั้งหมดด้วย + − × ÷ (และ ^ √ ! ตามเลเวล)
+   จนกว่าจะได้คำตอบตรงกัน แล้วซ่อนสูตรไว้จนกว่าจะกด "ดูวิธีคิด"
+   ========================================================= */
+let customPendingSolutions = [];
+
+function buildAtomVariants(n, level){
+  const variants = [{value:n, expr:`${n}`}];
+  if(level >= 2){
+    const sq = Math.sqrt(n);
+    if(n >= 0 && Number.isInteger(sq) && sq !== n){
+      variants.push({value:sq, expr:`√${n}`});
+    }
+  }
+  if(level >= 3){
+    if(Number.isInteger(n) && n >= 0 && n <= 10){
+      const f = factorial(n);
+      if(f !== n && isFinite(f)){
+        variants.push({value:f, expr:`${n}!`});
+      }
+    }
+  }
+  return variants;
+}
+
+function combineOps(a, b, level){
+  const res = [];
+  res.push({value:a.value+b.value, expr:`(${a.expr}+${b.expr})`});
+  res.push({value:a.value*b.value, expr:`(${a.expr}×${b.expr})`});
+  res.push({value:a.value-b.value, expr:`(${a.expr}-${b.expr})`});
+  res.push({value:b.value-a.value, expr:`(${b.expr}-${a.expr})`});
+  if(Math.abs(b.value) > 1e-9) res.push({value:a.value/b.value, expr:`(${a.expr}÷${b.expr})`});
+  if(Math.abs(a.value) > 1e-9) res.push({value:b.value/a.value, expr:`(${b.expr}÷${a.expr})`});
+  if(level >= 2){
+    if(Number.isInteger(b.value) && b.value >= 0 && b.value <= 12 && !(a.value===0 && b.value===0)){
+      res.push({value:Math.pow(a.value,b.value), expr:`${a.expr}^${b.expr}`});
+    }
+    if(Number.isInteger(a.value) && a.value >= 0 && a.value <= 12 && !(b.value===0 && a.value===0)){
+      res.push({value:Math.pow(b.value,a.value), expr:`${b.expr}^${a.expr}`});
+    }
+  }
+  if(level >= 3){
+    res.push(...sigmaCandidates(a, b));
+  }
+  return res;
+}
+
+/* ใช้สูตรซิกม่าชุดเดียวกับแท็บค้นหา โดยตีความ 2 ตัวเลขที่เลือกเป็นขอบเขต i=k..m
+   ใช้ "สูตรจริง" ของ k และ m เป็นข้อความขอบเขต (ไม่ใช่แค่ตัวเลขเปล่า) เพื่อให้เห็นที่มาครบ */
+function sigmaCandidates(a, b){
+  const res = [];
+  if(!Number.isInteger(a.value) || !Number.isInteger(b.value)) return res;
+  let lo = a, hi = b;
+  if(a.value > b.value){ lo = b; hi = a; }
+  const k = lo.value, m = hi.value;
+  if(k < 0 || m - k > 12) return res; // จำกัดช่วงไม่ให้กว้างเกินไป (ประสิทธิภาพ)
+  sigmaFormulas.forEach(f=>{
+    let sum = 0, ok = true;
+    for(let i=k; i<=m; i++){
+      const t = f.term(i);
+      if(!isFinite(t)){ ok = false; break; }
+      sum += t;
+      if(!isFinite(sum) || Math.abs(sum) > 1e12){ ok = false; break; }
+    }
+    if(ok){
+      res.push({value:sum, expr:`Σ_{i=${lo.expr}}^{${hi.expr}}(${f.sym})`});
+    }
+  });
+  return res;
+}
+
+/* ตัดวงเล็บนอกสุดที่ไม่จำเป็นออก เพื่อให้คำตอบสุดท้ายอ่านง่ายขึ้น (แค่ผลลัพธ์ตัวนอกสุดเท่านั้น
+   ไม่กระทบวงเล็บที่จำเป็นด้านในซึ่งยังคงลำดับการคำนวณเดิมไว้ถูกต้อง) */
+function stripOuterParens(s){
+  while(s[0] === '(' && s[s.length-1] === ')'){
+    let depth = 0, wraps = true;
+    for(let i=0; i<s.length; i++){
+      if(s[i] === '(') depth++;
+      else if(s[i] === ')'){
+        depth--;
+        if(depth === 0 && i !== s.length-1){ wraps = false; break; }
+      }
+    }
+    if(!wraps) break;
+    s = s.slice(1, -1);
+  }
+  return s;
+}
+
+function customSolve(numbers, target, level){
+  const atomSets = numbers.map(n => buildAtomVariants(n, level));
+  const seen = new Set();
+  const solutions = [];
+  const MAX_SOLUTIONS = 300;   // เก็บได้สูงสุดกี่วิธี (ไม่ซ้ำ)
+  const MAX_STEPS = 3000000;   // งบการค้นหา กันหน้าเว็บค้าง
+  let steps = 0;
+
+  function combine(list){
+    steps++;
+    if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
+    if(list.length === 1){
+      if(Math.abs(list[0].value - target) < 1e-6){
+        const clean = stripOuterParens(list[0].expr);
+        if(!seen.has(clean)){
+          seen.add(clean);
+          solutions.push(clean);
+        }
+      }
+      return;
+    }
+    for(let i=0; i<list.length; i++){
+      for(let j=i+1; j<list.length; j++){
+        const a = list[i], b = list[j];
+        const rest = list.filter((_, idx) => idx !== i && idx !== j);
+        const candidates = combineOps(a, b, level);
+        for(const cand of candidates){
+          if(!isFinite(cand.value) || Math.abs(cand.value) > 1e12) continue;
+          combine([...rest, cand]);
+          if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
+        }
+      }
+    }
+  }
+
+  function cartesian(idx, current){
+    if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
+    if(idx === atomSets.length){
+      combine(current.slice());
+      return;
+    }
+    for(const variant of atomSets[idx]){
+      current.push(variant);
+      cartesian(idx+1, current);
+      current.pop();
+      if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
+    }
+  }
+
+  cartesian(0, []);
+  // เรียงจากสูตรที่สั้น/เข้าใจง่ายที่สุดก่อน
+  solutions.sort((a,b)=> a.length - b.length);
+  return solutions;
+}
+
+function renderCustomProblem(nums, target){
+  let html = `<div class="digit-label">ตัวเลข:</div>`;
+  html += `<div class="digit-row">`;
+  nums.forEach(n=>{ html += `<div class="digit-tile">${n}</div>`; });
+  html += `</div>`;
+  html += `<div class="digit-label">ผลลัพธ์:</div>`;
+  html += `<div class="answer-box">${target.toLocaleString('en-US')}</div>`;
+  return html;
+}
+
+function customSearch(){
+  const rawNums = document.getElementById('customNumbersInput').value;
+  const nums = rawNums.split(/[,\s]+/).map(s=>s.trim()).filter(s=>s.length>0).map(s=>parseInt(s));
+  const target = parseInt(document.getElementById('customTargetInput').value);
+  const level = parseInt(document.getElementById('customLevelSelect').value);
+  const resultsEl = document.getElementById('customResults');
+
+  if(nums.length < 2 || nums.length > 5 || nums.some(n=>isNaN(n) || n<0 || n>999)){
+    resultsEl.innerHTML = `<div class="status-bar">⚠️ กรุณาใส่ตัวเลข 4-5 ตัว (0-999) คั่นด้วยคอมม่าหรือเว้นวรรค</div>`;
+    return;
+  }
+  if(isNaN(target)){
+    resultsEl.innerHTML = `<div class="status-bar">⚠️ กรุณาใส่คำตอบที่ต้องการ</div>`;
+    return;
+  }
+
+  let html = renderCustomProblem(nums, target);
+
+  const solutions = customSolve(nums, target, level);
+  customPendingSolutions = solutions;
+
+  if(solutions.length > 0){
+    html += `<button class="search" onclick="revealCustomSolution()">🔍 ดูวิธีคิด (${solutions.length} วิธี)</button>`;
+    html += `<div id="customReveal" style="margin-top:14px;"></div>`;
+    html += `<div class="solve-note">พบทั้งหมด ${solutions.length} วิธีที่ไม่ซ้ำกัน (Lv.${level}) — ถ้าตัวเลข/คำตอบซับซ้อนมาก ระบบอาจค้นไม่ครบทุกวิธีเพื่อไม่ให้หน้าเว็บค้าง</div>`;
+  } else {
+    html += `<div class="status-bar">😕 ยังไม่พบวิธีรวมตัวเลขเหล่านี้ให้ได้คำตอบนี้ในระดับที่เลือก ลองเปลี่ยนตัวเลข คำตอบ หรือเพิ่มเลเวลดูนะ</div>`;
+  }
+
+  resultsEl.innerHTML = html;
+}
+
+function revealCustomSolution(){
+  const el = document.getElementById('customReveal');
+  if(!el || customPendingSolutions.length === 0) return;
+  const target = document.getElementById('customTargetInput').value;
+  el.innerHTML = customPendingSolutions.map(expr=>{
+    // ถ้าทั้งสูตรเป็นซิกม่าล้วนๆ ให้โชว์เป็นการ์ดแบบเดียวกับแท็บค้นหา
+    const pureMatch = expr.match(/^Σ_\{i=([^}]+)\}\^\{([^}]+)\}\(([^()]+)\)$/);
+    if(pureMatch){
+      const [, k, m, sym] = pureMatch;
+      return renderCustomSigmaCard(k, m, sym, target);
+    }
+    // ถ้ามีซิกม่าแทรกอยู่ในสูตรผสม ให้แปลงเป็นสัญลักษณ์ Σ แบบย่อฝังในบรรทัด
+    // (ขอบเขตบน/ล่างอาจเป็นสูตรย่อย เช่น √8×8+√4 ก็จะแสดงสูตรนั้นเหนือ Σ ตรงๆ)
+    const displayExpr = expr.replace(/Σ_\{i=([^}]+)\}\^\{([^}]+)\}\(([^()]+)\)/g, (match, k, m, sym)=>{
+      return `<span class="sigma-inline"><span class="sigma-symbol-mini"><span class="sig-top-mini">${m}</span><span class="sig-big-mini">Σ</span><span class="sig-bottom-mini">i=${k}</span></span><span class="sigma-term-mini">(${sym})</span></span>`;
+    });
+    return `<div class="reveal-item">${displayExpr} = ${target}</div>`;
+  }).join('');
+}
+
+function renderCustomSigmaCard(k, m, sym, target){
+  return `
+    <div class="sigma-wrap">
+      <span class="sigma-tag">✅ พบคำตอบ</span>
+      <div class="sigma-item">
+        <div class="sigma-symbol">
+          <span class="sig-top">${m}</span>
+          <span class="sig-big">Σ</span>
+          <span class="sig-bottom">i=${k}</span>
+        </div>
+        <div class="sigma-term">(${sym})</div>
+        <div class="sigma-eq">=</div>
+        <div class="sigma-val">${Number(target).toLocaleString('en-US')}</div>
+      </div>
+    </div>
+  `;
+}
+
 /* ---------- แท็บ ---------- */
 function showTab(tab){
-  const isSearch = tab === 'search';
-  document.getElementById('tabSearch').style.display = isSearch ? '' : 'none';
-  document.getElementById('tabHistory').style.display = isSearch ? 'none' : '';
-  document.getElementById('tabSearchBtn').classList.toggle('active', isSearch);
-  document.getElementById('tabHistoryBtn').classList.toggle('active', !isSearch);
-  if(!isSearch) renderHistory();
+  document.getElementById('tabSearch').style.display  = tab === 'search'  ? '' : 'none';
+  document.getElementById('tabCustom').style.display  = tab === 'custom'  ? '' : 'none';
+  document.getElementById('tabHistory').style.display = tab === 'history' ? '' : 'none';
+  document.getElementById('tabSearchBtn').classList.toggle('active', tab === 'search');
+  document.getElementById('tabCustomBtn').classList.toggle('active', tab === 'custom');
+  document.getElementById('tabHistoryBtn').classList.toggle('active', tab === 'history');
+  if(tab === 'history') renderHistory();
 }
 
 /* ---------- โหมดมืด ---------- */
