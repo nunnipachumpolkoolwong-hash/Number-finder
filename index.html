@@ -1,912 +1,352 @@
 <!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NumberFinder - ที่มาของตัวเลข</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mali:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="เกมคิดเลขเร็ว ใช้เลขทุกตัวให้ได้คำตอบ พร้อมใบความรู้ แฟคทอเรียล ซิกม่า ราก และยกกำลัง">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Itim&family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+<title>คิดเลขเร็ว</title>
 <style>
-  :root{
-    --bg:#fafbfe; --panel:#ffffff; --border:#eef0f5;
-    --ink:#2b2f3a; --muted:#9098a8;
-    --primary:#5b6cff; --primary-soft:#eef0ff;
-    --pink:#ff5ba0;   --pink-soft:#ffeaf3;
-    --amber:#ffab2e;  --amber-soft:#fff4e2;
-    --teal:#17c3b2;   --teal-soft:#e4faf7;
-    --violet:#9b6bff; --violet-soft:#f2ebff;
-    --sky:#2ec4ff;    --sky-soft:#e5f8ff;
-    --green:#2ecc71;  --green-soft:#e8faf0;
-    --red:#ff5c72;    --red-soft:#ffeef0;
-    --shadow:0 4px 18px rgba(60,70,110,0.06);
-  }
-  body.dark{
-    --bg:#000000; --panel:#0a0a0a; --border:#232323;
-    --ink:#f0f0f0; --muted:#8a8a8a;
-    --primary:#7b8bff; --primary-soft:#14141f;
-    --pink:#ff7bb5;   --pink-soft:#1f1218;
-    --amber:#ffc266;  --amber-soft:#1f1a10;
-    --teal:#3fd9c7;   --teal-soft:#0d1a18;
-    --violet:#b28dff; --violet-soft:#16121f;
-    --sky:#5cd2ff;    --sky-soft:#0c161c;
-    --green:#4fe28f;  --green-soft:#0d1a12;
-    --red:#ff7d90;    --red-soft:#1f1013;
-    --shadow:0 4px 18px rgba(0,0,0,0.6);
-  }
-  body.dark input[type=number], body.dark input[type=text], body.dark select{ background:#0f0f0f; color:var(--ink); }
-  body.dark input[type=number]:focus, body.dark input[type=text]:focus, body.dark select:focus{ background:#141414; }
-  *{box-sizing:border-box; font-family:"Mali","Segoe UI",sans-serif;}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    padding:20px; transition:background .25s, color .25s;
-  }
-  .layout{ display:block; max-width:900px; margin:0 auto; }
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#e6e6fa;--ink:#1f1b55;--pink:#d6366f;--card:#fff;--line:#c9c9ea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17163a;--ink:#ecebff;--card:#25235a;--line:#3c3a80}}
+:root[data-theme="dark"]{--bg:#17163a;--ink:#ecebff;--card:#25235a;--line:#3c3a80}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.app{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:0;min-height:100vh;min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+@media(max-width:760px){.app{grid-template-columns:1fr}}
+.left{padding:22px;border-right:2px solid var(--ink)}
+@media(max-width:760px){.left{border-right:0;border-bottom:2px solid var(--ink)}}
+h1{margin:0;font-size:22px}.sub{font-size:11px;opacity:.7}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+.timer{text-align:right;font-weight:700;font-size:20px}
+.tag{margin:14px 0;background:#1f1b55;color:#fff;font-size:64px;font-weight:800;text-align:center;padding:6px 0 6px 30px;clip-path:polygon(8% 0,100% 0,100% 100%,8% 100%,0 50%)}
+.tiles{display:flex;gap:10px;justify-content:space-between}
+.tile{width:22%;aspect-ratio:1;border-radius:50%;border:0;background:var(--pink);color:#fff;font-size:30px;font-weight:700;box-shadow:0 4px 0 #8f2250}
+.tile:disabled{opacity:.3}
+.paper{background:var(--card);margin:16px 0;padding:14px;border-radius:6px;min-height:90px}
+.expr{min-height:34px;font-size:24px;word-break:break-all;border-bottom:2px dashed var(--line)}
+.res{text-align:right;font-weight:700;padding-top:6px;min-height:28px}
+.keys{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.k{padding:13px 0;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font-size:16px;font-weight:700}
+.k.p{border-color:var(--pink);color:var(--pink)}
+.go{width:100%;margin-top:12px;padding:14px;border:0;border-radius:12px;background:var(--ink);color:var(--bg);font-size:16px;font-weight:700}
+.msg{min-height:22px;margin-top:8px;font-size:14px;font-weight:600}
+.right{padding:22px;display:flex;flex-direction:column;gap:18px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.tab{padding:10px 18px;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;font-size:16px;font-weight:700}
+.tab.on{background:var(--ink);color:var(--bg)}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:320px}
+.welcome{text-align:center}.welcome svg{max-width:300px;width:100%;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.note{background:var(--card);border-radius:16px;padding:22px;width:100%;max-width:640px;line-height:1.7}
+.note h2{margin:0 0 6px;color:var(--pink)}
+.ex{background:var(--bg);padding:8px 12px;border-radius:8px;margin:6px 0;font-weight:600}
+[hidden]{display:none!important}
+</style></head><body>
+<div class="app">
+<section class="left">
+ <div class="top"><div><h1>คิดเลขเร็ว</h1><div class="sub">ข้อละ 1 นาที · ใช้เลขทุกตัว</div></div>
+ <div class="timer" id="timer">01:00<div class="sub" id="score">0 ข้อ</div></div></div>
+ <div class="tag" id="target">53</div>
+ <div class="tiles" id="tiles"></div>
+ <div class="paper"><div class="expr" id="expr"></div><div class="res" id="res">=</div></div>
+ <div class="keys" id="keys"></div>
+ <button class="go" id="go">ส่งคำตอบ</button>
+ <div class="msg" id="msg"></div>
+ <div class="keys" style="grid-template-columns:repeat(3,1fr);margin-top:8px">
+  <button class="k" id="new">สุ่มโจทย์ใหม่</button><button class="k" id="clr">ล้าง</button><button class="k" id="rst">รีเซ็ต</button></div>
+</section>
 
-  .topbar{
-    max-width:900px; margin:0 auto 18px auto; display:flex; align-items:center;
-    justify-content:space-between; gap:12px; flex-wrap:wrap;
-  }
-  .tabs{ display:flex; gap:8px; background:var(--panel); border:1px solid var(--border);
-    border-radius:14px; padding:5px; box-shadow:var(--shadow); flex-wrap:wrap; }
-  .tab-btn{
-    border:none; background:transparent; padding:9px 16px; border-radius:10px;
-    font-size:0.92rem; font-weight:700; color:var(--muted); cursor:pointer;
-    display:flex; align-items:center; gap:6px; transition:background .15s,color .15s;
-  }
-  .tab-btn.active{ background:var(--primary); color:#fff; }
-  .tab-count{
-    background:rgba(255,255,255,0.25); font-size:0.7rem; padding:1px 7px; border-radius:20px;
-  }
-  .tab-btn:not(.active) .tab-count{ background:var(--red-soft); color:var(--red); }
-  .theme-toggle{
-    border:none; background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow);
-    width:42px; height:42px; border-radius:12px; font-size:1.15rem; cursor:pointer;
-  }
-  .tab-panel{ max-width:900px; margin:0 auto; }
-  @media (min-width:900px){ .topbar, .tab-panel{ max-width:1400px; } }
-
-  .history-wrap{
-    background:var(--panel); border:1px solid var(--border); border-radius:20px;
-    padding:22px; box-shadow:var(--shadow);
-  }
-  .history-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-  .clear-btn{
-    border:none; background:var(--red-soft); color:var(--red); font-weight:700;
-    padding:8px 14px; border-radius:10px; cursor:pointer; font-size:0.82rem;
-  }
-  .hint-msg{ font-size:0.78rem; color:var(--muted); margin-bottom:16px; }
-  .history-item{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    padding:12px 16px; border-radius:12px; background:var(--primary-soft);
-    margin-bottom:8px; cursor:pointer; transition:transform .1s;
-  }
-  .history-item:active{ transform:scale(0.98); }
-  .history-item .h-num{ font-weight:800; font-size:1.15rem; color:var(--ink); }
-  .history-item .h-meta{ font-size:0.75rem; color:var(--muted); }
-  .history-item .h-time{ font-size:0.72rem; color:var(--muted); white-space:nowrap; }
-  .history-empty{ text-align:center; color:var(--muted); padding:30px 10px; font-size:0.9rem; }
-
-  .panel-left{
-    background:var(--panel); border:1px solid var(--border);
-    border-radius:20px; padding:22px; box-shadow:var(--shadow);
-    width:100%; margin-bottom:20px;
-  }
-  .panel-right{ width:100%; }
-
-  @media (min-width:900px){
-    .layout{ display:flex; gap:20px; max-width:1400px; align-items:flex-start; }
-    .panel-left{ flex:0 0 290px; width:290px; position:sticky; top:20px; margin-bottom:0; }
-    .panel-right{ flex:1; min-width:300px; }
-  }
-  h2.title{
-    display:flex; align-items:center; gap:8px; font-size:1.15rem; font-weight:800;
-    margin:0 0 20px 0; color:var(--primary);
-  }
-  label{ display:block; font-size:0.8rem; color:var(--muted); margin-bottom:6px; font-weight:600; }
-  input[type=number], input[type=text]{
-    width:100%; padding:13px 16px; border-radius:14px; border:2px solid var(--border);
-    background:#f8f9fd; font-size:1.15rem; margin-bottom:16px; outline:none; color:var(--ink);
-    font-weight:700; transition:border-color .15s;
-  }
-  input[type=number]:focus, input[type=text]:focus{ border-color:var(--primary); background:#fff; }
-  select{
-    width:100%; padding:13px 16px; border-radius:14px; border:2px solid var(--border);
-    background:#f8f9fd; font-size:1rem; margin-bottom:18px; outline:none; color:var(--ink);
-    font-weight:600;
-  }
-  select:focus{ border-color:var(--primary); background:#fff; }
-  .quick{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:20px; }
-  .quick span{
-    background:var(--primary-soft); color:var(--primary); padding:6px 13px; border-radius:20px;
-    font-size:0.8rem; cursor:pointer; font-weight:700; transition:transform .1s;
-  }
-  .quick span:active{ transform:scale(0.94); }
-  button.search{
-    width:100%; padding:15px; border:none; border-radius:14px;
-    background:linear-gradient(135deg,var(--primary),#7b6bff); color:#fff; font-size:1.02rem;
-    font-weight:800; cursor:pointer; box-shadow:0 6px 16px rgba(91,108,255,0.35);
-  }
-  button.search:active{ transform:scale(0.98); }
-  .cond{
-    margin-top:22px; background:var(--primary-soft); border-radius:16px; padding:16px 18px;
-    font-size:0.85rem; color:var(--ink); line-height:1.8; font-weight:600;
-  }
-  .cond b{ display:block; color:var(--primary); margin-bottom:8px; font-size:0.92rem; }
-  .cond ul{ margin:0; padding-left:18px; }
-
-  h2.results-title{ font-size:1.6rem; font-weight:800; color:var(--ink); margin:0 0 14px 4px; }
-  h2.results-title span{ color:var(--pink); font-weight:800; }
-  .status-bar{
-    background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow);
-    border-radius:14px; padding:13px 18px; text-align:center;
-    font-size:0.92rem; color:var(--ink); font-weight:600; margin-bottom:18px;
-  }
-  .status-bar b{ color:var(--primary); }
-
-  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:16px; }
-
-  .section{
-    background:var(--panel); border:1px solid var(--border); border-radius:18px;
-    padding:18px 20px; box-shadow:var(--shadow);
-  }
-  .section.empty{ opacity:0.6; }
-  .section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-  .section-head .name{ font-weight:800; font-size:0.95rem; display:flex; gap:8px; align-items:center; }
-  .icon-badge{
-    width:30px; height:30px; border-radius:10px; display:flex; align-items:center;
-    justify-content:center; font-size:1rem; flex:none;
-  }
-  .badge{ font-size:0.72rem; font-weight:800; padding:4px 11px; border-radius:20px; white-space:nowrap; }
-  .badge.count{ background:var(--green-soft); color:#1e9e56; }
-  .badge.empty{ background:var(--red-soft); color:#d1435a; }
-
-  .item-row{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:9px 12px; margin-bottom:6px; border-radius:10px; font-size:1rem;
-    background:var(--primary-soft);
-  }
-  .item-row:last-child{ margin-bottom:0; }
-  .item-row .expr{ font-weight:700; color:var(--ink); }
-  .empty-msg{ font-size:0.85rem; color:var(--muted); padding:4px 2px; }
-
-  /* สีเฉพาะแต่ละหมวด */
-  .c-mult .icon-badge{ background:var(--sky-soft); }
-  .c-mult .item-row{ background:var(--sky-soft); }
-  .c-mult .name{ color:var(--sky); }
-
-  .c-div .icon-badge{ background:var(--green-soft); }
-  .c-div .item-row{ background:var(--green-soft); }
-  .c-div .name{ color:var(--green); }
-
-  .c-pow .icon-badge{ background:var(--amber-soft); }
-  .c-pow .item-row{ background:var(--amber-soft); }
-  .c-pow .name{ color:var(--amber); }
-
-  .c-powm .icon-badge{ background:var(--violet-soft); }
-  .c-powm .item-row{ background:var(--violet-soft); }
-  .c-powm .name{ color:var(--violet); }
-
-  .c-sqrt .icon-badge{ background:var(--teal-soft); }
-  .c-sqrt .item-row{ background:var(--teal-soft); }
-  .c-sqrt .name{ color:var(--teal); }
-
-  .c-fact .icon-badge{ background:var(--pink-soft); }
-  .c-fact .item-row{ background:var(--pink-soft); }
-  .c-fact .name{ color:var(--pink); }
-
-  .c-sigma{ background:linear-gradient(180deg,var(--primary-soft),var(--panel)); border-color:var(--border); }
-  .c-sigma .icon-badge{ background:var(--primary-soft); }
-  .c-sigma .name{ color:var(--primary); }
-
-  .sigma-tag{
-    font-size:0.7rem; font-weight:800; color:var(--green); background:var(--green-soft);
-    padding:2px 9px; border-radius:20px; display:inline-block; margin-bottom:8px;
-  }
-
-  .sigma-wrap{ margin-bottom:12px; }
-  .sigma-wrap:last-child{ margin-bottom:0; }
-  .sigma-item{
-    display:flex; align-items:center; gap:16px; padding:16px 18px;
-    border-radius:14px; background:var(--panel); border:1px solid var(--border);
-    box-shadow:0 2px 10px rgba(91,108,255,0.08);
-  }
-  .sigma-symbol{
-    display:inline-flex; flex-direction:column; align-items:center;
-    line-height:1.1; flex:none; min-width:38px;
-  }
-  .sig-top{ font-size:0.78rem; font-weight:800; color:var(--ink); font-style:italic; }
-  .sig-big{ font-size:2.1rem; color:var(--primary); font-weight:400; margin:1px 0; }
-  .sig-bottom{ font-size:0.7rem; font-weight:700; color:var(--ink); font-style:italic; white-space:nowrap; }
-  .sigma-term{ font-size:1.2rem; color:var(--ink); font-weight:700; }
-  .sigma-eq{ font-size:1.2rem; color:var(--ink); font-weight:700; }
-  .sigma-val{ font-size:1.35rem; font-weight:800; color:var(--primary); margin-left:auto; }
-
-  /* ---------- แท็บกำหนดเอง ---------- */
-  .digit-label{ font-size:0.85rem; color:var(--muted); font-weight:700; margin:0 0 10px 2px; }
-  .digit-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
-  .digit-tile{
-    width:58px; height:58px; border-radius:14px; border:2px solid var(--border);
-    background:var(--panel); box-shadow:var(--shadow); display:flex; align-items:center;
-    justify-content:center; font-size:1.7rem; font-weight:800; color:var(--ink);
-  }
-  .answer-box{
-    background:var(--primary-soft); border-radius:16px; padding:22px; text-align:center;
-    font-size:2.1rem; font-weight:800; color:var(--primary); margin-bottom:18px;
-    border:1px solid var(--border);
-  }
-  .reveal-item{
-    padding:14px 16px; border-radius:12px; background:var(--green-soft);
-    margin-bottom:8px; font-size:1rem; font-weight:700; color:var(--ink); word-break:break-word;
-  }
-  .reveal-item:last-child{ margin-bottom:0; }
-  .solve-note{ font-size:0.75rem; color:var(--muted); margin-top:10px; text-align:center; }
-
-  .sigma-inline{ display:inline-flex; align-items:center; gap:2px; vertical-align:middle; margin:0 3px; }
-  .sigma-symbol-mini{ display:inline-flex; flex-direction:column; align-items:center; line-height:1; min-width:20px; }
-  .sig-top-mini{ font-size:0.55rem; font-weight:800; color:var(--ink); font-style:italic; }
-  .sig-big-mini{ font-size:1.3rem; color:var(--primary); font-weight:400; margin:-2px 0; }
-  .sig-bottom-mini{ font-size:0.5rem; font-weight:700; color:var(--ink); font-style:italic; white-space:nowrap; }
-  .sigma-term-mini{ font-weight:700; }
-</style>
-</head>
-<body>
-
-<div class="topbar">
-  <div class="tabs">
-    <button class="tab-btn active" id="tabSearchBtn" onclick="showTab('search')">🔍 ค้นหา</button>
-    <button class="tab-btn" id="tabCustomBtn" onclick="showTab('custom')">🤍วิธีคิด</button>
-    <button class="tab-btn" id="tabHistoryBtn" onclick="showTab('history')">🕘 ประวัติ <span id="historyCount" class="tab-count" style="display:none;">0</span></button>
+<section class="right">
+ <div class="tabs" id="tabs">
+  <button class="tab" data-t="fact">แฟคทอเรียล</button>
+  <button class="tab" data-t="sigma">ซิกม่า</button>
+  <button class="tab" data-t="root">ราก</button>
+  <button class="tab" data-t="pow">ยกกำลัง</button>
+ </div>
+ <div class="stage">
+  <div class="welcome" id="welcome">
+   <svg viewBox="0 0 240 240" aria-label="ซิกม่าผูกโบว์">
+    <circle cx="120" cy="125" r="95" fill="#fff" opacity=".6"/>
+    <text x="120" y="175" font-size="170" font-weight="800" text-anchor="middle" fill="#1f1b55" font-family="serif">Σ</text>
+    <circle cx="105" cy="105" r="5" fill="#fff"/><circle cx="135" cy="105" r="5" fill="#fff"/>
+    <path d="M108 125q12 10 24 0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <g fill="#d6366f"><path d="M185 40l-30 -14v28z"/><path d="M185 40l30 -14v28z"/><circle cx="185" cy="40" r="9"/></g>
+    <g fill="#d6366f" font-size="22" font-weight="700"><text x="30" y="60">√</text><text x="200" y="190">!</text><text x="25" y="190">x²</text></g>
+   </svg>
+   <h2>สวัสดี! มาเล่นคิดเลขเร็วกัน</h2>
+   <div class="sub" style="font-size:14px">แตะแท็บด้านบนเพื่อเปิดใบความรู้ — โจทย์ฝั่งซ้ายยังอยู่เหมือนเดิม</div>
   </div>
-  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="สลับโหมดมืด/สว่าง">🌙</button>
+  <div class="note" id="note" hidden></div>
+ </div>
+</section>
 </div>
-
-<div id="tabSearch" class="tab-panel">
-<div class="layout">
-
-  <div class="panel-left">
-    <h2 class="title">🔍 ค้นหาตัวเลข</h2>
-
-    <label>ใส่ตัวเลขที่ต้องการ (1 - 1,000)</label>
-    <input type="number" id="numInput" value="0">
-
-    <div class="quick" id="quickPicks"></div>
-
-    <label>เลือกระดับการค้นหา</label>
-    <select id="levelSelect">
-      <option value="1">Lv.1 </option>
-      <option value="2">Lv.2 </option>
-      <option value="3" selected>Lv.3 </option>
-    </select>
-
-    <button class="search" onclick="explore()">ค้นหา</button>
-
-    <div class="cond">
-      <b>ข้อมูลระบบ</b>
-      <ul>
-        <li>ตารางสูตรคูณ แม่ 2-30 (×1-12)</li>
-        <li>ตารางเลขยกกำลัง / ยกกำลังคูณ</li>
-        <li>ตารางรากที่สอง / กำลังสอง-สาม</li>
-        <li>ตารางแฟคทอเรียล และ แฟคหาร</li>
-        <li>สูตรซิกม่าทุกแบบ (Σi, Σi², ฯลฯ)</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="panel-right">
-    <h2 class="results-title">ที่มาของ <span id="targetTitle">64</span></h2>
-    <div id="statusBar" class="status-bar"></div>
-    <div id="results"></div>
-  </div>
-
-</div>
-</div>
-
-<div id="tabCustom" class="tab-panel" style="display:none;">
-<div class="layout">
-
-  <div class="panel-left">
-    <h2 class="title">💯วิธีคิด</h2>
-
-    <label>ใส่ตัวเลข 4-5 ตัว (คั่นด้วย , หรือเว้นวรรค)</label>
-    <input type="text" id="customNumbersInput" placeholder="เช่น 4,2,5,9,9">
-
-    <label>คำตอบที่ต้องการ</label>
-    <input type="number" id="customTargetInput" placeholder="เช่น 392">
-
-    <label>เลือกระดับการค้นหา</label>
-    <select id="customLevelSelect">
-      <option value="1">Lv.1 (+ − × ÷)</option>
-      <option value="2">Lv.2 (+ − × ÷ ^ √)</option>
-      <option value="3" selected>Lv.3 (+ − × ÷ ^ √ ! Σ)</option>
-    </select>
-
-    <button class="search" onclick="customSearch()">ค้นหาวิธีคิด</button>
-
-    <div class="cond">
-      <b>วิธีใช้งาน</b>
-      <ul>
-        <li>พิมพ์ตัวเลขที่มีอยู่ในมือ เช่น 4,2,5,9,9</li>
-        <li>ใส่คำตอบที่อยากได้ เช่น 392</li>
-        <li>ระบบจะลองรวม "ตัวเลขทั้งหมด" ด้วย + − × ÷ (และ ^ √ ! ตามเลเวลที่เลือก, Lv.3 รวมสูตรซิกม่า Σ ด้วย) จนกว่าจะได้คำตอบตรงกัน</li>
-        <li>กด "ดูวิธีคิด" เพื่อเผยสูตรที่เจอ</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="panel-right">
-    <h2 class="results-title">โจทย์ของคุณ</h2>
-    <div id="customResults"></div>
-  </div>
-
-</div>
-</div>
-
-<div id="tabHistory" class="tab-panel" style="display:none;">
-  <div class="history-wrap">
-    <div class="history-head">
-      <h2 class="results-title" style="margin:0;">🕘 ประวัติการค้นหา</h2>
-      <button class="clear-btn" onclick="clearHistory()">ล้างประวัติ</button>
-    </div>
-    <div class="hint-msg">* บันทึกประวัติการค้นหาอัตโนมัติด้วย Local Storage</div>
-    <div id="historyList"></div>
-  </div>
-</div>
-
 <script>
-const quicks = [50, 100, 200, 400, 500, 800, 900, 1000];
-const qEl = document.getElementById('quickPicks');
-quicks.forEach(n=>{
-  const s = document.createElement('span');
-  s.textContent = n;
-  s.onclick = ()=>{ document.getElementById('numInput').value = n; explore(); };
-  qEl.appendChild(s);
-});
-
-function factorial(n){
-  if(n<0) return NaN;
-  if(n>170) return Infinity; 
-  let r=1;
-  for(let x=2;x<=n;x++){
-    r*=x;
-    if(!isFinite(r)) return Infinity;
-  }
-  return r;
-}
-
-/* ---------- 1) ตารางสูตรคูณ แม่ 2-30 (×1-12) ---------- */
-function checkMultiplicationTable(n){
-  const res = [];
-  for(let m=2; m<=30; m++){
-    for(let x=1; x<=12; x++){
-      if(m*x === n) res.push(`${m} × ${x}`);
-    }
-  }
-  return res;
-}
-
-/* ---------- 1b) การหารธรรมดา (÷) — แก้ไขให้ผลลัพธ์เท่ากับตัวที่หา (n) ---------- */
-function checkDivision(n){
-  const res = [];
-  // วนลูปหาคู่ตัวเลขที่หารกันแล้วได้ผลลัพธ์เท่ากับ n (เช่น a ÷ b = n  หรือ a = b * n)
-  // โดยให้ตัวตั้ง (a) ไม่เกิน 10,000 เพื่อไม่ให้ตัวเลขเยอะเกินไป
-  for(let b = 1; b <= 50; b++){
-    const a = n * b;
-    if(a <= 10000) {
-      res.push(`${a} ÷ ${b} = ${n}`);
-    }
-  }
-  return res.slice(0, 10); // จำกัดแสดงผลไม่เกิน 10 แบบ
-}
-
-
-/* ---------- 2) ตารางเลขยกกำลัง และ ยกกำลังคูณ ---------- */
-function checkPowerTable(n){
-  const res = [];
-  for(let base=2; base<=10; base++){
-    for(let exp=2; exp<=10; exp++){
-      if(Math.pow(base,exp) === n) res.push(`${base}^${exp}`);
-    }
-  }
-  for(let b=11; b<=32; b++){
-    if(b*b === n) res.push(`${b}²`);
-  }
-  return [...new Set(res)];
-}
-
-function checkPowerMultiplyTable(n){
-  const res = [];
-  const ranges = {2:8, 3:6, 4:5, 5:4, 6:4, 7:4, 8:4, 9:4};
-  for(const base in ranges){
-    const maxP = ranges[base];
-    for(let p=1; p<=maxP; p++){
-      const basePow = Math.pow(Number(base), p);
-      for(let x=1; x<=12; x++){
-        if(basePow*x === n) res.push(`${base}^${p} × ${x}`);
-      }
-    }
-  }
-  return res;
-}
-
-/* ---------- 3) รากที่สอง / กำลังสอง-สาม ---------- */
-function checkSquareRoot(n){
-  const res = [];
-  const sq = Math.sqrt(n);
-  if(Number.isInteger(sq)) res.push(`√${n} = ${sq} (${sq}² = ${n})`);
-  const cbRound = Math.round(Math.cbrt(n));
-  if(cbRound*cbRound*cbRound === n) res.push(`${cbRound}³ = ${n}`);
-  return res;
-}
-
-/* ---------- 4) แฟคทอเรียล (!) ---------- */
-function checkFactorialPure(n){
-  const res = [];
-  for(let a=0;a<=9;a++){
-    if(factorial(a) === n) res.push(`${a}!`);
-  }
-  return res;
-}
-
-/* ---------- 4b) แฟคหาร ---------- */
-function checkFactorialDivision(n){
-  const res = [];
-  const fact = [];
-  for(let i=0;i<=9;i++) fact.push(factorial(i));
-  for(let a=2;a<=9;a++){
-    for(let m=1;m<=fact[a];m++){
-      if(fact[a] % m === 0 && fact[a]/m === n && m>1){
-        res.push(`${a}! ÷ ${m}`);
-      }
-    }
-    for(let b=1;b<a;b++){
-      if(fact[a]/fact[b] === n) res.push(`${a}! ÷ ${b}!`);
-    }
-  }
-  return [...new Set(res)].slice(0,8);
-}
-
-/* ---------- 5) สูตรซิกม่าทั้งหมด ---------- */
-const SIGMA_MAX = 50;
-const sigmaFormulas = [
-  {label:'Σi',              sym:'i',        term:i=>i},
-  {label:'Σ(i+i)',          sym:'i+i',      term:i=>2*i},
-  {label:'Σ(i×i)',          sym:'i×i',      term:i=>i*i},
-  {label:'Σ(i!/i)',         sym:'i!/i',     term:i=>i>=1?factorial(i-1):NaN},
-  {label:'Σ(i!−i)',         sym:'i!−i',     term:i=>factorial(i)-i},
-  {label:'Σ(i!+i!)',        sym:'i!+i!',    term:i=>2*factorial(i)},
-  {label:'Σ(i!×i!)',        sym:'i!×i!',    term:i=>Math.pow(factorial(i),2)},
-  {label:'Σ(i+i)!',         sym:'(i+i)!',   term:i=>factorial(2*i)},
-  {label:'Σ i^i',           sym:'iⁱ',       term:i=>Math.pow(i,i)},
-  {label:'Σ i^(i!)',        sym:'i^(i!)',   term:i=>Math.pow(i,factorial(i))},
-  {label:'Σ (i!)^(i!)',     sym:'(i!)^(i!)',term:i=>Math.pow(factorial(i),factorial(i))},
-  {label:'Σ (i!)!',         sym:'(i!)!',    term:i=>factorial(factorial(i))},
-  {label:'Σ ((i!)!+i)',     sym:'(i!)!+i',  term:i=>factorial(factorial(i))+i},
-  {label:'Σ ((i!)!−i)',     sym:'(i!)!−i',  term:i=>factorial(factorial(i))-i},
-  {label:'Σ (i!−i)!',       sym:'(i!−i)!',  term:i=>factorial(factorial(i)-i)},
-];
-for(let base=2; base<=9; base++){
-  sigmaFormulas.push({ label:`Σ (${base}^i)`, sym:`${base}ⁱ`, term:(i)=>Math.pow(base,i) });
-}
-sigmaFormulas.forEach(f=> f.maxI = SIGMA_MAX);
-
-function checkSigma(n){
-  const res = [];
-  const CAP = 1e15;
-  sigmaFormulas.forEach(f=>{
-    for(let k=1; k<=f.maxI; k++){
-      let sum = 0;
-      for(let m=k; m<=f.maxI; m++){
-        const t = f.term(m);
-        if(!isFinite(t) || Math.abs(t) > CAP) break;
-        sum += t;
-        if(Math.abs(sum) > CAP) break;
-        if(sum === n){
-          res.push({sym:f.sym, k, m, target:n});
-        }
-        if(sum > n && t >= 0){ break; }
-      }
-    }
-  });
-  return res.slice(0, 10);
-}
-
-/* ---------- Render ---------- */
-function renderSigmaItem(it){
-  return `
-    <div class="sigma-wrap">
-      <span class="sigma-tag">✅ พบคำตอบ</span>
-      <div class="sigma-item">
-        <div class="sigma-symbol">
-          <span class="sig-top">${it.m}</span>
-          <span class="sig-big">Σ</span>
-          <span class="sig-bottom">i=${it.k}</span>
-        </div>
-        <div class="sigma-term">(${it.sym})</div>
-        <div class="sigma-eq">=</div>
-        <div class="sigma-val">${it.target.toLocaleString('en-US')}</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderSection(name, icon, items, colorClass, isSigma){
-  const found = items.length > 0;
-  let html = `<div class="section ${colorClass} ${found?'':'empty'}">
-    <div class="section-head">
-      <div class="name"><span class="icon-badge">${icon}</span> ${name}</div>
-      <div class="badge ${found?'count':'empty'}">${found? items.length+' แบบ' : 'ไม่พบ'}</div>
-    </div>`;
-  if(found){
-    if(isSigma){
-      items.forEach(it=>{ html += renderSigmaItem(it); });
-    } else {
-      items.forEach(it=>{
-        html += `<div class="item-row"><span class="expr">${it}</span></div>`;
-      });
-    }
-  } else {
-    html += `<div class="empty-msg">ไม่พบรูปแบบนี้ในตาราง</div>`;
-  }
-  html += `</div>`;
-  return html;
-}
-
-function explore(){
-  const n = parseInt(document.getElementById('numInput').value);
-  const level = document.getElementById('levelSelect').value;
-  const resultsEl = document.getElementById('results');
-  const statusEl = document.getElementById('statusBar');
-  const titleEl = document.getElementById('targetTitle');
-
-  if(!n || n < 1 || n > 1000){
-    statusEl.textContent = '⚠️ กรุณาใส่ตัวเลขระหว่าง 1 ถึง 1,000';
-    resultsEl.innerHTML = '';
-    titleEl.textContent = '-';
-    return;
-  }
-
-  titleEl.textContent = n;
-
-  const mult   = checkMultiplicationTable(n);
-  const divc   = checkDivision(n);
-  const pow    = checkPowerTable(n);
-  const powm   = checkPowerMultiplyTable(n);
-  const sqrtc  = level >= 2 ? checkSquareRoot(n) : [];
-  const factc  = level >= 3 ? checkFactorialPure(n) : [];
-  const factdc = level >= 3 ? checkFactorialDivision(n) : [];
-  const sigmac = level >= 3 ? checkSigma(n) : [];
-
-  const sections = [
-    {name:'แม่สูตรคูณ (แม่ 2-30 × 1-12)', icon:'✖️', items:mult,  cls:'c-mult'},
-    {name:'การหาร (÷)', icon:'➗', items:divc, cls:'c-div'},
-    {name:'เลขยกกำลัง (aᵇ)', icon:'⚡', items:pow, cls:'c-pow'},
-    {name:'ยกกำลังคูณ (baseᵖ × x)', icon:'⚡✖️', items:powm, cls:'c-powm'},
-  ];
-  if(level >= 2){
-    sections.push({name:'รากที่สอง / กำลังสาม', icon:'🔲', items:sqrtc, cls:'c-sqrt'});
-  }
-  if(level >= 3){
-    sections.push({name:'แฟคทอเรียล (n!)', icon:'❗', items:factc, cls:'c-fact'});
-    sections.push({name:'แฟคหาร (n! ÷ ตัวเลข / แฟคทอเรียล)', icon:'❗➗', items:factdc, cls:'c-fact'});
-    sections.push({name:'สูตรซิกม่า (Σ) — i ไม่เกิน 50', icon:'Σ', items:sigmac, cls:'c-sigma', sigma:true});
-  }
-
-  const totalFound = sections.filter(s=>s.items.length>0).length;
-  statusEl.innerHTML = `ตรวจ <b>${sections.length}</b> หมวด (Lv.${level}) — พบที่มาใน <b>${totalFound}</b> หมวด`;
-
-  let html = '<div class="grid">';
-  sections.forEach(s=>{
-    html += renderSection(s.name, s.icon, s.items, s.cls, !!s.sigma);
-  });
-  html += '</div>';
-
-  resultsEl.innerHTML = html;
-
-  addToHistory(n, level, totalFound, sections.length);
-}
-
-/* =========================================================
-   แท็บ "กำหนดเอง" — ผู้ใช้พิมพ์ตัวเลขเองและคำตอบที่ต้องการ
-   ระบบจะลองรวมตัวเลขทั้งหมดด้วย + − × ÷ (และ ^ √ ! ตามเลเวล)
-   จนกว่าจะได้คำตอบตรงกัน แล้วซ่อนสูตรไว้จนกว่าจะกด "ดูวิธีคิด"
-   ========================================================= */
-let customPendingSolutions = [];
-
-function buildAtomVariants(n, level){
-  const variants = [{value:n, expr:`${n}`}];
-  if(level >= 2){
-    const sq = Math.sqrt(n);
-    if(n >= 0 && Number.isInteger(sq) && sq !== n){
-      variants.push({value:sq, expr:`√${n}`});
-    }
-  }
-  if(level >= 3){
-    if(Number.isInteger(n) && n >= 0 && n <= 10){
-      const f = factorial(n);
-      if(f !== n && isFinite(f)){
-        variants.push({value:f, expr:`${n}!`});
-      }
-    }
-  }
-  return variants;
-}
-
-function combineOps(a, b, level){
-  const res = [];
-  res.push({value:a.value+b.value, expr:`(${a.expr}+${b.expr})`});
-  res.push({value:a.value*b.value, expr:`(${a.expr}×${b.expr})`});
-  res.push({value:a.value-b.value, expr:`(${a.expr}-${b.expr})`});
-  res.push({value:b.value-a.value, expr:`(${b.expr}-${a.expr})`});
-  if(Math.abs(b.value) > 1e-9) res.push({value:a.value/b.value, expr:`(${a.expr}÷${b.expr})`});
-  if(Math.abs(a.value) > 1e-9) res.push({value:b.value/a.value, expr:`(${b.expr}÷${a.expr})`});
-  if(level >= 2){
-    if(Number.isInteger(b.value) && b.value >= 0 && b.value <= 12 && !(a.value===0 && b.value===0)){
-      res.push({value:Math.pow(a.value,b.value), expr:`${a.expr}^${b.expr}`});
-    }
-    if(Number.isInteger(a.value) && a.value >= 0 && a.value <= 12 && !(b.value===0 && a.value===0)){
-      res.push({value:Math.pow(b.value,a.value), expr:`${b.expr}^${a.expr}`});
-    }
-  }
-  if(level >= 3){
-    res.push(...sigmaCandidates(a, b));
-  }
-  return res;
-}
-
-/* ใช้สูตรซิกม่าชุดเดียวกับแท็บค้นหา โดยตีความ 2 ตัวเลขที่เลือกเป็นขอบเขต i=k..m
-   ใช้ "สูตรจริง" ของ k และ m เป็นข้อความขอบเขต (ไม่ใช่แค่ตัวเลขเปล่า) เพื่อให้เห็นที่มาครบ */
-function sigmaCandidates(a, b){
-  const res = [];
-  if(!Number.isInteger(a.value) || !Number.isInteger(b.value)) return res;
-  let lo = a, hi = b;
-  if(a.value > b.value){ lo = b; hi = a; }
-  const k = lo.value, m = hi.value;
-  if(k < 0 || m - k > 12) return res; // จำกัดช่วงไม่ให้กว้างเกินไป (ประสิทธิภาพ)
-  sigmaFormulas.forEach(f=>{
-    let sum = 0, ok = true;
-    for(let i=k; i<=m; i++){
-      const t = f.term(i);
-      if(!isFinite(t)){ ok = false; break; }
-      sum += t;
-      if(!isFinite(sum) || Math.abs(sum) > 1e12){ ok = false; break; }
-    }
-    if(ok){
-      res.push({value:sum, expr:`Σ_{i=${lo.expr}}^{${hi.expr}}(${f.sym})`});
-    }
-  });
-  return res;
-}
-
-/* ตัดวงเล็บนอกสุดที่ไม่จำเป็นออก เพื่อให้คำตอบสุดท้ายอ่านง่ายขึ้น (แค่ผลลัพธ์ตัวนอกสุดเท่านั้น
-   ไม่กระทบวงเล็บที่จำเป็นด้านในซึ่งยังคงลำดับการคำนวณเดิมไว้ถูกต้อง) */
-function stripOuterParens(s){
-  while(s[0] === '(' && s[s.length-1] === ')'){
-    let depth = 0, wraps = true;
-    for(let i=0; i<s.length; i++){
-      if(s[i] === '(') depth++;
-      else if(s[i] === ')'){
-        depth--;
-        if(depth === 0 && i !== s.length-1){ wraps = false; break; }
-      }
-    }
-    if(!wraps) break;
-    s = s.slice(1, -1);
-  }
-  return s;
-}
-
-function customSolve(numbers, target, level){
-  const atomSets = numbers.map(n => buildAtomVariants(n, level));
-  const seen = new Set();
-  const solutions = [];
-  const MAX_SOLUTIONS = 300;   // เก็บได้สูงสุดกี่วิธี (ไม่ซ้ำ)
-  const MAX_STEPS = 3000000;   // งบการค้นหา กันหน้าเว็บค้าง
-  let steps = 0;
-
-  function combine(list){
-    steps++;
-    if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
-    if(list.length === 1){
-      if(Math.abs(list[0].value - target) < 1e-6){
-        const clean = stripOuterParens(list[0].expr);
-        if(!seen.has(clean)){
-          seen.add(clean);
-          solutions.push(clean);
-        }
-      }
-      return;
-    }
-    for(let i=0; i<list.length; i++){
-      for(let j=i+1; j<list.length; j++){
-        const a = list[i], b = list[j];
-        const rest = list.filter((_, idx) => idx !== i && idx !== j);
-        const candidates = combineOps(a, b, level);
-        for(const cand of candidates){
-          if(!isFinite(cand.value) || Math.abs(cand.value) > 1e12) continue;
-          combine([...rest, cand]);
-          if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
-        }
-      }
-    }
-  }
-
-  function cartesian(idx, current){
-    if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
-    if(idx === atomSets.length){
-      combine(current.slice());
-      return;
-    }
-    for(const variant of atomSets[idx]){
-      current.push(variant);
-      cartesian(idx+1, current);
-      current.pop();
-      if(solutions.length >= MAX_SOLUTIONS || steps > MAX_STEPS) return;
-    }
-  }
-
-  cartesian(0, []);
-  // เรียงจากสูตรที่สั้น/เข้าใจง่ายที่สุดก่อน
-  solutions.sort((a,b)=> a.length - b.length);
-  return solutions;
-}
-
-function renderCustomProblem(nums, target){
-  let html = `<div class="digit-label">ตัวเลข:</div>`;
-  html += `<div class="digit-row">`;
-  nums.forEach(n=>{ html += `<div class="digit-tile">${n}</div>`; });
-  html += `</div>`;
-  html += `<div class="digit-label">ผลลัพธ์:</div>`;
-  html += `<div class="answer-box">${target.toLocaleString('en-US')}</div>`;
-  return html;
-}
-
-function customSearch(){
-  const rawNums = document.getElementById('customNumbersInput').value;
-  const nums = rawNums.split(/[,\s]+/).map(s=>s.trim()).filter(s=>s.length>0).map(s=>parseInt(s));
-  const target = parseInt(document.getElementById('customTargetInput').value);
-  const level = parseInt(document.getElementById('customLevelSelect').value);
-  const resultsEl = document.getElementById('customResults');
-
-  if(nums.length < 2 || nums.length > 5 || nums.some(n=>isNaN(n) || n<0 || n>999)){
-    resultsEl.innerHTML = `<div class="status-bar">⚠️ กรุณาใส่ตัวเลข 4-5 ตัว (0-999) คั่นด้วยคอมม่าหรือเว้นวรรค</div>`;
-    return;
-  }
-  if(isNaN(target)){
-    resultsEl.innerHTML = `<div class="status-bar">⚠️ กรุณาใส่คำตอบที่ต้องการ</div>`;
-    return;
-  }
-
-  let html = renderCustomProblem(nums, target);
-
-  const solutions = customSolve(nums, target, level);
-  customPendingSolutions = solutions;
-
-  if(solutions.length > 0){
-    html += `<button class="search" onclick="revealCustomSolution()">🔍 ดูวิธีคิด (${solutions.length} วิธี)</button>`;
-    html += `<div id="customReveal" style="margin-top:14px;"></div>`;
-    html += `<div class="solve-note">พบทั้งหมด ${solutions.length} วิธีที่ไม่ซ้ำกัน (Lv.${level}) — ถ้าตัวเลข/คำตอบซับซ้อนมาก ระบบอาจค้นไม่ครบทุกวิธีเพื่อไม่ให้หน้าเว็บค้าง</div>`;
-  } else {
-    html += `<div class="status-bar">😕 ยังไม่พบวิธีรวมตัวเลขเหล่านี้ให้ได้คำตอบนี้ในระดับที่เลือก ลองเปลี่ยนตัวเลข คำตอบ หรือเพิ่มเลเวลดูนะ</div>`;
-  }
-
-  resultsEl.innerHTML = html;
-}
-
-function revealCustomSolution(){
-  const el = document.getElementById('customReveal');
-  if(!el || customPendingSolutions.length === 0) return;
-  const target = document.getElementById('customTargetInput').value;
-  el.innerHTML = customPendingSolutions.map(expr=>{
-    // ถ้าทั้งสูตรเป็นซิกม่าล้วนๆ ให้โชว์เป็นการ์ดแบบเดียวกับแท็บค้นหา
-    const pureMatch = expr.match(/^Σ_\{i=([^}]+)\}\^\{([^}]+)\}\(([^()]+)\)$/);
-    if(pureMatch){
-      const [, k, m, sym] = pureMatch;
-      return renderCustomSigmaCard(k, m, sym, target);
-    }
-    // ถ้ามีซิกม่าแทรกอยู่ในสูตรผสม ให้แปลงเป็นสัญลักษณ์ Σ แบบย่อฝังในบรรทัด
-    // (ขอบเขตบน/ล่างอาจเป็นสูตรย่อย เช่น √8×8+√4 ก็จะแสดงสูตรนั้นเหนือ Σ ตรงๆ)
-    const displayExpr = expr.replace(/Σ_\{i=([^}]+)\}\^\{([^}]+)\}\(([^()]+)\)/g, (match, k, m, sym)=>{
-      return `<span class="sigma-inline"><span class="sigma-symbol-mini"><span class="sig-top-mini">${m}</span><span class="sig-big-mini">Σ</span><span class="sig-bottom-mini">i=${k}</span></span><span class="sigma-term-mini">(${sym})</span></span>`;
-    });
-    return `<div class="reveal-item">${displayExpr} = ${target}</div>`;
-  }).join('');
-}
-
-function renderCustomSigmaCard(k, m, sym, target){
-  return `
-    <div class="sigma-wrap">
-      <span class="sigma-tag">✅ พบคำตอบ</span>
-      <div class="sigma-item">
-        <div class="sigma-symbol">
-          <span class="sig-top">${m}</span>
-          <span class="sig-big">Σ</span>
-          <span class="sig-bottom">i=${k}</span>
-        </div>
-        <div class="sigma-term">(${sym})</div>
-        <div class="sigma-eq">=</div>
-        <div class="sigma-val">${Number(target).toLocaleString('en-US')}</div>
-      </div>
-    </div>
-  `;
-}
-
-/* ---------- แท็บ ---------- */
-function showTab(tab){
-  document.getElementById('tabSearch').style.display  = tab === 'search'  ? '' : 'none';
-  document.getElementById('tabCustom').style.display  = tab === 'custom'  ? '' : 'none';
-  document.getElementById('tabHistory').style.display = tab === 'history' ? '' : 'none';
-  document.getElementById('tabSearchBtn').classList.toggle('active', tab === 'search');
-  document.getElementById('tabCustomBtn').classList.toggle('active', tab === 'custom');
-  document.getElementById('tabHistoryBtn').classList.toggle('active', tab === 'history');
-  if(tab === 'history') renderHistory();
-}
-
-/* ---------- โหมดมืด ---------- */
-function toggleTheme(){
-  const dark = document.body.classList.toggle('dark');
-  document.getElementById('themeToggle').textContent = dark ? '☀️' : '🌙';
-}
-
-/* ---------- ประวัติการค้นหา (Local Storage) ---------- */
-let searchHistory = JSON.parse(localStorage.getItem('numberFinderHistory')) || [];
-
-function updateHistoryBadge(){
-  const countEl = document.getElementById('historyCount');
-  countEl.textContent = searchHistory.length;
-  countEl.style.display = searchHistory.length > 0 ? 'inline-block' : 'none';
-}
-updateHistoryBadge();
-
-function addToHistory(n, level, foundCount, totalSections){
-  const last = searchHistory[0];
-  if(last && last.n === n && last.level === level) return;
-  
-  searchHistory.unshift({
-    n, level, foundCount, totalSections,
-    time: new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})
-  });
-  
-  if(searchHistory.length > 30) searchHistory.pop();
-  
-  localStorage.setItem('numberFinderHistory', JSON.stringify(searchHistory));
-  updateHistoryBadge();
-}
-
-function renderHistory(){
-  const el = document.getElementById('historyList');
-  if(searchHistory.length === 0){
-    el.innerHTML = `<div class="history-empty">ยังไม่มีประวัติการค้นหา</div>`;
-    return;
-  }
-  el.innerHTML = searchHistory.map((h,idx)=>`
-    <div class="history-item" onclick="loadFromHistory(${idx})">
-      <div>
-        <div class="h-num">${h.n.toLocaleString('en-US')}</div>
-        <div class="h-meta">Lv.${h.level} • พบที่มา ${h.foundCount}/${h.totalSections} หมวด</div>
-      </div>
-      <div class="h-time">${h.time}</div>
-    </div>
-  `).join('');
-}
-
-function loadFromHistory(idx){
-  const h = searchHistory[idx];
-  if(!h) return;
-  document.getElementById('numInput').value = h.n;
-  document.getElementById('levelSelect').value = h.level;
-  showTab('search');
-  explore();
-}
-
-function clearHistory(){
-  searchHistory = [];
-  localStorage.removeItem('numberFinderHistory');
-  updateHistoryBadge();
-  renderHistory();
-}
-
-explore();
+const $=id=>document.getElementById(id);
+let cur=null,time=60;
+$('tabs').onclick=e=>{const t=e.target.closest('.tab');if(t)show(t.dataset.t)};
+setInterval(()=>{time=Math.max(0,time-1);const m=String(Math.floor(time/60)).padStart(2,'0'),s=String(time%60).padStart(2,'0');
+ $('timer').firstChild.textContent=m+':'+s},1000);
 </script>
-</body>
-</html>
+<style>
+.stage:has(.note:not([hidden])){align-items:flex-start}
+.note{max-width:900px;position:relative;padding-top:34px}
+.tape{position:absolute;top:-8px;width:90px;height:22px;opacity:.85;background:conic-gradient(#8fb9ee 25%,#e6f0fc 0 50%,#8fb9ee 0 75%,#e6f0fc 0) 0 0/10px 10px}
+.tape.a{left:24px;transform:rotate(-4deg)}.tape.b{right:24px;transform:rotate(3deg)}
+.hd{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;font-size:26px}
+.hd h2{margin:0;font-size:34px;color:var(--c);-webkit-text-stroke:6px #111;paint-order:stroke fill}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{padding:6px 14px;border-radius:99px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);font-size:14px;font-weight:600}
+.chip.on{background:var(--c);border-color:var(--c);color:#fff}
+.sc{overflow-x:auto;margin:10px 0}
+.sc table{border-collapse:collapse;font-size:14px;min-width:100%}
+.sc th,.sc td{border:1.5px solid var(--line);padding:6px 9px;text-align:right;white-space:nowrap}
+.sc th{background:var(--bg);color:var(--c);text-align:center}
+.sc td.d{background:var(--bg);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:10px 0}
+.grid div{background:var(--bg);border-radius:12px;padding:10px;text-align:center;font-weight:700;border:2px dashed var(--c)}
+.rule{background:var(--bg);border-left:5px solid var(--c);padding:8px 12px;border-radius:8px;margin:8px 0;font-weight:600}
+</style>
+<script>
+const rg=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+const F=n=>n<2?1:n*F(n-1);
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const fr=(a,b)=>{const g=gcd(a,b);return b/g===1?a/g:(a/g)+'/'+(b/g)};
+function tbl(corner,cols,rows,cell,cl=c=>c,rl=r=>r){
+ return '<div class="sc"><table><tr><th>'+corner+'</th>'+cols.map(c=>'<th>'+cl(c)+'</th>').join('')+'</tr>'+
+ rows.map(r=>'<tr><th>'+rl(r)+'</th>'+cols.map(c=>{const v=cell(r,c);return '<td'+(v&&v.d?' class="d"':'')+'>'+(v===null?'':(v&&v.d?v.v:v))+'</td>'}).join('')+'</tr>').join('')+'</table></div>'}
+function baseChips(a,b){return '<div class="chips">'+rg(a,b).map(x=>'<button class="chip'+(S.base===x?' on':'')+'" data-b="'+x+'">ฐาน '+x+'</button>').join('')+'</div>'}
+const sigF=[i=>i,i=>2*i,i=>i*i];
+function sig(k){const f=sigF[k];return '<div class="rule">Σ(i=M→N) '+['i','2i','i²'][k]+' &nbsp;· แถว = M (ค่าเริ่มต้น), คอลัมน์ = N (ค่าสุดท้าย)</div>'+
+ tbl('M＼N',rg(1,15),rg(1,9),(m,n)=>{if(n<m)return null;let s=0;for(let i=m;i<=n;i++)s+=f(i);return n===m?{d:1,v:s}:s})}
+const C={
+fact:{title:'แฟคทอเรียล!!!',col:'#2fa866',dc:['🌿','🍀','🥬'],secs:[
+ ['ตารางแฟค',()=>'<div class="grid">'+rg(0,10).map(n=>'<div>'+n+'! = '+F(n)+'</div>').join('')+'</div><div class="rule">n! = n×(n−1)×…×1 และ 0! = 1</div>'],
+ ['แฟคหารเลข',()=>'<div class="rule">n! ÷ k  (ถ้าลงตัวขึ้นเป็นเลขเต็ม ไม่ลงตัวเป็นเศษส่วน) · n! ÷ n = (n−1)!</div>'+tbl('n!',[2,3,4,5,6,'n'],rg(2,10),(n,k)=>{const d=k==='n'?n:k;const v=fr(F(n),d);return k==='n'?{d:1,v}:v},k=>'÷ '+k,n=>n+'! = '+F(n))],
+ ['แฟคหารแฟค',()=>'<div class="rule">n! ÷ m! = (m+1)×(m+2)×…×n เมื่อ n ≥ m</div>'+tbl('n＼m',rg(1,10),rg(1,10),(n,m)=>n<m?null:(n===m?{d:1,v:1}:F(n)/F(m)),m=>m+'!',n=>n+'!')]]},
+sigma:{title:'ซิกม่า Σ',col:'#d6366f',dc:['🎀','💖','✨'],secs:[['Sum (i)',()=>sig(0)],['Sum (i+i) หรือ 2i',()=>sig(1)],['Sum (i×i) หรือ i²',()=>sig(2)]]},
+root:{title:'ราก √',col:'#2f7fc0',dc:['🫧','💎','🌊'],secs:[
+ ['รากที่สอง',()=>'<div class="rule">√x = k เมื่อ k×k = x</div>'+tbl('√x',['แยกตัวประกอบ','ค่าที่ได้','ยกกำลังสอง'],rg(1,25),(x,c)=>{const k=x;return c==='ค่าที่ได้'?{d:1,v:k}:c==='ยกกำลังสอง'?k+'² = '+k*k:'√('+k+'×'+k+')'},c=>c,k=>'√'+k*k)],
+ ['รากที่สาม',()=>'<div class="rule">∛x = k เมื่อ k×k×k = x</div>'+tbl('∛x',['แยกตัวประกอบ','ค่าที่ได้'],rg(1,10),(k,c)=>c==='ค่าที่ได้'?{d:1,v:k}:k+'×'+k+'×'+k+' = '+k**3,c=>c,k=>'∛'+k**3)]]},
+pow:{title:'ยกกำลัง ^',col:'#f28a1e',dc:['🔥','⭐','🧡'],secs:[
+ ['ยกกำลังคูณ',()=>{const b=S.base,mx=b===2?8:b===3?6:b===4?5:4;return baseChips(2,9)+tbl('',rg(1,12),rg(1,mx),(e,k)=>b**e*k,k=>'×'+k,e=>b+'<sup>'+e+'</sup>')}],
+ ['ตารางเลขยกกำลัง',()=>tbl('ฐาน＼เลขชี้กำลัง',rg(2,10),rg(2,10),(b,e)=>b**e,e=>e,b=>b)],
+ ['กำลังสอง 13–32',()=>'<div class="grid">'+rg(13,32).map(n=>'<div>'+n+'² = '+n*n+'</div>').join('')+'</div>'],
+ ['ยกกำลังหาร',()=>{const b=S.base;return '<div class="rule">a<sup>n</sup> ÷ a<sup>k</sup> = a<sup>n−k</sup> · a<sup>0</sup> = 1 · a<sup>−n</sup> = 1/a<sup>n</sup></div>'+baseChips(2,9)+tbl(b+'<sup>n</sup>＼÷'+b+'<sup>k</sup>',rg(1,10),rg(1,10),(n,k)=>n<k?null:(n===k?{d:1,v:1}:b**(n-k)),k=>b+'<sup>'+k+'</sup>',n=>b+'<sup>'+n+'</sup> = '+b**n)}]]}};
+let S={sec:0,base:2};
+function renderNote(){
+ const c=C[cur];$('note').style.boxShadow='0 0 0 3px '+c.col+', 0 8px 0 3px '+c.col+'55';
+ $('note').innerHTML='<div class="tape a" style="--c:'+c.col+'"></div><div class="tape b" style="--c:'+c.col+'"></div><span class="fl f1">'+c.dc[2]+'</span><span class="fl f2">'+c.dc[0]+'</span><div class="hd" style="--c:'+c.col+'"><span>'+c.dc[0]+'</span><h2>'+c.title+'</h2><span>'+c.dc[1]+'</span></div>'+
+ '<div style="--c:'+c.col+'"><div class="chips">'+c.secs.map((s,i)=>'<button class="chip'+(S.sec===i?' on':'')+'" data-s="'+i+'">'+s[0]+'</button>').join('')+'</div>'+c.secs[S.sec][1]()+'</div>';
+}
+function show(t){
+ cur=(cur===t)?null:t;S={sec:0,base:2};
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===cur));
+ $('welcome').hidden=!!cur;$('note').hidden=!cur;if(cur)renderNote();
+}
+$('note').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;
+ if(b.dataset.s!==undefined){S.sec=+b.dataset.s}else S.base=+b.dataset.b;renderNote()};
+</script>
+<style>
+body{overflow-x:hidden;font-family:"Mali","Noto Sans Thai","Sarabun",system-ui,sans-serif}
+button,input{font-family:inherit}
+h1,.hd h2,.tag,.tile,.timer,.tab,.mode,.chip{font-family:"Itim","Mali","Noto Sans Thai",system-ui,sans-serif}
+.k,.go{font-family:"Mali","Noto Sans Thai",system-ui,sans-serif}
+.app{grid-template-columns:minmax(300px,420px) minmax(0,1fr)}
+@media(max-width:760px){.app{grid-template-columns:minmax(0,1fr)}}
+.left,.right{min-width:0}
+.tag{font-size:clamp(44px,12vw,64px)}
+.tiles{gap:8px;justify-content:center}
+.tile{width:auto;flex:1 1 0;max-width:84px;font-size:clamp(20px,6vw,30px)}
+.modes{display:flex;gap:8px;margin:12px 0 0}
+.mode{flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;font-size:13px}
+.mode.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.expr{min-height:64px;line-height:1.9;padding:2px 4px;border-radius:6px}
+.expr{border-bottom:0;padding:6px 10px;border-radius:12px;margin-bottom:4px}
+.expr.on{outline:none;background:rgba(214,54,111,.1);box-shadow:inset 0 0 0 2px var(--pink)}
+.res{border-top:2px dashed var(--line);margin-top:8px;padding-top:8px}
+.sg{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:15px;margin:0 3px}
+.sg b{font-size:30px;line-height:1}
+.slot{display:inline-block;min-width:22px;min-height:24px;padding:0 5px;border:1.5px dashed var(--line);border-radius:6px;text-align:center;font-size:16px;line-height:22px}
+.slot.on{border-color:var(--pink);background:rgba(214,54,111,.2)}
+.tape{background:conic-gradient(color-mix(in srgb,var(--c) 75%,#fff) 25%,color-mix(in srgb,var(--c) 15%,#fff) 0 50%,color-mix(in srgb,var(--c) 75%,#fff) 0 75%,color-mix(in srgb,var(--c) 15%,#fff) 0) 0 0/10px 10px}
+.fl{position:absolute;top:0;font-size:26px;pointer-events:none}.fl.f1{right:130px}.fl.f2{left:130px}
+.left{margin:14px 0 14px 14px;border:3px solid var(--ink);border-radius:28px;box-shadow:6px 6px 0 var(--pink);background:color-mix(in srgb,var(--card) 55%,transparent);position:relative}
+@media(max-width:760px){.left{margin:14px}}
+.left::after{content:"✨";position:absolute;top:10px;right:16px;font-size:20px;pointer-events:none}
+h1::before{content:"🎀 "}
+.tag{position:relative;background:linear-gradient(135deg,#2e2780,#1f1b55);text-shadow:3px 3px 0 var(--pink);filter:drop-shadow(0 5px 0 rgba(214,54,111,.35))}
+.tag::before{content:"";position:absolute;left:4.5%;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--bg)}
+.tag::after{content:"✦ ✧";position:absolute;right:12px;top:4px;font-size:16px;color:#ffd1e3;text-shadow:none;letter-spacing:6px}
+.tile{border:3px solid #fff;background:radial-gradient(circle at 30% 25%,#fff8 0 10%,transparent 28%),var(--tc,var(--pink));box-shadow:0 5px 0 var(--tb,#8f2250),0 9px 12px rgba(0,0,0,.15);transition:transform .1s}
+.tile:nth-child(5n+1){--tc:#e0457f;--tb:#8f2250}.tile:nth-child(5n+2){--tc:#f58a3c;--tb:#a8551a}.tile:nth-child(5n+3){--tc:#2fb37a;--tb:#1b7550}.tile:nth-child(5n+4){--tc:#7a5cf0;--tb:#4a33b0}.tile:nth-child(5n+5){--tc:#3a9be8;--tb:#1f64a0}
+.tile:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--tb)}
+.paper{position:relative;margin-top:22px;border:2.5px solid var(--ink);border-radius:18px;background-color:var(--card)}
+.paper::before{content:"";position:absolute;top:-12px;left:50%;width:84px;height:22px;transform:translateX(-50%) rotate(-3deg);background:conic-gradient(#ffb3cf 25%,#ffe4ef 0 50%,#ffb3cf 0 75%,#ffe4ef 0) 0 0/10px 10px;opacity:.9}
+.mode{border-radius:99px}
+.k{border-radius:14px;box-shadow:0 3px 0 var(--line)}
+.k:active{transform:translateY(2px);box-shadow:none}
+.go{border-radius:99px;background:linear-gradient(135deg,var(--pink),#ff7aa8);color:#fff;box-shadow:0 4px 0 #8f2250}
+.go::before{content:"💌 "}
+.go:active{transform:translateY(3px);box-shadow:0 1px 0 #8f2250}
+#sol{position:fixed;inset:0;background:rgba(31,27,85,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.solc{background:var(--card);color:var(--ink);border:3px solid var(--ink);border-radius:24px;box-shadow:6px 6px 0 var(--pink);padding:20px;max-width:420px;width:100%;text-align:center;animation:solpop .25s ease-out}
+@keyframes solpop{from{transform:scale(.7);opacity:0}}
+.solh{font-family:"Itim","Mali",sans-serif;font-size:26px;color:var(--pink)}
+.sols{font-size:13px;opacity:.8;margin-bottom:10px}
+.st{font-size:22px;font-weight:700;padding:6px 10px;margin:6px 0;background:var(--bg);border-radius:12px;word-break:break-all}
+.st:last-of-type{background:var(--pink);color:#fff}
+.solb{margin-top:12px;padding:10px 26px;border:0;border-radius:99px;background:var(--ink);color:var(--bg);font-weight:700;font-size:16px;box-shadow:0 4px 0 var(--pink);font-family:inherit}
+.help{font-size:12px;line-height:1.6;opacity:.85;margin-top:10px}
+</style>
+<script>
+(function(){
+const rnd=n=>Math.floor(Math.random()*n);
+let sol=null,mode=4,root=[],act=root,owner=null,digits=[],target=0,score=0,locked=false;
+// ---- ตัวคำนวณ (รองรับ + − × ÷ ^ ( ) √ ! Σ i) ----
+function ev(ns,env){
+ const t=[];
+ for(let i=0;i<ns.length;i++){const x=ns[i];
+  if(x.k==='d'){if(ns[i+1]&&ns[i+1].k==='d')throw 0;t.push({n:+x.v})}
+  else if(x.k==='sig')t.push({sig:x});else t.push({o:x.v})}
+ let p=0;const isO=v=>t[p]&&t[p].o===v;
+ function ex(){let v=tm();while(isO('+')||isO('−')){const o=t[p++].o,r=tm();v=o==='+'?v+r:v-r}return v}
+ function tm(){let v=un();while(isO('×')||isO('÷')){const o=t[p++].o,r=un();if(o==='÷'&&r===0)throw 0;v=o==='×'?v*r:v/r}return v}
+ function un(){if(isO('−')){p++;return -un()}return pw()}
+ function pw(){let b=po();if(isO('^')){p++;const e=un();if(!Number.isInteger(e)||e<-10||e>10)throw 0;b=b**e}return b}
+ function po(){let v=pr();while(isO('!')){p++;if(!Number.isInteger(v)||v<0||v>10)throw 0;v=F(v);if(isO('!'))throw 0}return v}
+ function pr(){const x=t[p++];if(!x)throw 0;
+  if(x.n!==undefined)return x.n;
+  if(x.sig){const a=ev(x.sig.f),b=ev(x.sig.to);if(!Number.isInteger(a)||!Number.isInteger(b)||a>b||b-a>999)throw 0;let s=0;for(let i=a;i<=b;i++)s+=ev(x.sig.b,{i});return s}
+  if(x.o==='i'){if(!env||env.i===undefined)throw 0;return env.i}
+  if(x.o==='('){const v=ex();if(!isO(')'))throw 0;p++;return v}
+  if(x.o==='√'){const v=pr();if(v<0)throw 0;return Math.sqrt(v)}
+  throw 0}
+ const v=ex();if(p!==t.length)throw 0;return v}
+// ---- สร้างโจทย์ ----
+function gen(){
+ const n=mode,lo=n===4?10:100,hi=n===4?99:999,ops=['+','−','×','×','÷','^'];
+ for(let k=0;k<30000;k++){
+  const d=Array.from({length:n},()=>1+rnd(9)),ns=[];
+  d.forEach((x,i)=>{ns.push({k:'d',v:String(x)});if(i<n-1)ns.push({k:'o',v:ops[rnd(ops.length)]})});
+  try{const v=ev(ns);if(Number.isInteger(v)&&v>=lo&&v<=hi)return{d,v,ns}}catch(e){}
+ }
+ return n===4?{d:[3,8,7,5],v:53}:{d:[2,3,4,5,6],v:123};
+}
+function col(a,o){a.forEach(x=>{if(x.k==='d')o.push(x.tile);else if(x.k==='sig'){col(x.f,o);col(x.to,o);col(x.b,o)}})}
+const used=()=>{const o=[];col(root,o);return o};
+const txt=a=>a.map(x=>x.v).join('');
+const msg=t=>$('msg').textContent=t;
+function draw(){
+ const u=used();
+ $('tiles').innerHTML=digits.map((d,i)=>'<button class="tile" data-i="'+i+'" '+(u.includes(i)?'disabled':'')+'>'+d+'</button>').join('');
+ const sl=(a,i,n)=>'<span class="slot'+(act===a?' on':'')+'" data-i="'+i+'" data-n="'+n+'">'+(a.length?txt(a):'▢')+'</span>';
+ $('expr').innerHTML=root.map((x,i)=>x.k==='sig'?'<span class="sg">'+sl(x.to,i,'to')+'<b>Σ</b><span>i='+sl(x.f,i,'f')+'</span></span>('+sl(x.b,i,'b')+')':x.v).join('');
+ $('expr').classList.toggle('on',act===root);
+ let v=null;try{v=ev(root);if(!isFinite(v))v=null}catch(e){}
+ const jn=a=>a.some((x,i)=>x.k==='d'&&a[i+1]&&a[i+1].k==='d')||a.some(x=>x.k==='sig'&&(jn(x.f)||jn(x.to)||jn(x.b)));
+ $('res').textContent=jn(root)?'ห้ามต่อเลขติดกัน':'= '+(v===null?'':Math.round(v*1e6)/1e6);
+}
+function clr(){root=[];act=root;owner=null;msg('');draw()}
+function newQ(){const g=gen();digits=g.d;target=g.v;sol=g.ns||null;$('target').textContent=target;clr();time=60;locked=false}
+// ---- ปุ่มโหมด ----
+const md=document.createElement('div');md.className='modes';
+md.innerHTML='<button class="mode on" data-m="4">คำถาม 4 · ตอบ 2 หลัก</button><button class="mode" data-m="5">คำถาม 5 · ตอบ 3 หลัก</button>';
+$('target').parentNode.insertBefore(md,$('target'));
+md.onclick=e=>{const b=e.target.closest('.mode');if(!b)return;mode=+b.dataset.m;md.querySelectorAll('.mode').forEach(x=>x.classList.toggle('on',x===b));newQ()};
+// ---- ปุ่มคีย์ ----
+const filled=s=>s.f.length||s.to.length||s.b.length;
+function press(k){
+ if(k==='⌫'){
+  const last=root[root.length-1];
+  if(act===root&&last&&last.k==='sig'&&filled(last)){
+   // ไม่ลบ Σ ทั้งก้อน: เข้าไปลบทีละส่วนข้างในก่อน
+   owner=last;act=last.b.length?last.b:last.to.length?last.to:last.f;
+  }else if(act.length){
+   act.pop();
+   if(!act.length&&owner&&act!==root&&filled(owner))act=owner.b.length?owner.b:owner.to.length?owner.to:owner.f;
+  }else if(owner&&act!==root&&!filled(owner)){root.splice(root.indexOf(owner),1);act=root;owner=null}
+ }else if(k==='Σ'){if(act!==root)return;const n={k:'sig',f:[],to:[],b:[]};root.push(n);owner=n;act=n.f}
+ else if(k==='i'){if(!owner||act!==owner.b)return;act.push({k:'o',v:'i'})}
+ else act.push({k:'o',v:k});
+ draw()}
+$('keys').innerHTML='';$('keys').style.gridTemplateColumns='repeat(6,1fr)';
+['+','−','×','÷','(',')','^','√','!','Σ','i','⌫','ล้าง'].forEach(k=>{
+ const b=document.createElement('button');b.className='k'+('^√!Σi'.includes(k)?' p':'');b.textContent=k;
+ if(k==='ล้าง'){b.style.gridColumn='span 6';b.onclick=clr}else b.onclick=()=>press(k);
+ $('keys').appendChild(b)});
+$('tiles').onclick=e=>{const t=e.target.closest('.tile');if(!t||t.disabled)return;const i=+t.dataset.i;act.push({k:'d',v:String(digits[i]),tile:i});draw()};
+$('expr').onclick=e=>{const s=e.target.closest('.slot');if(s){owner=root[+s.dataset.i];act=owner[s.dataset.n]}else{act=root}draw()};
+// ---- ส่งคำตอบ / ปุ่มล่าง ----
+$('go').onclick=()=>{
+ if(locked)return;
+ if(used().length<digits.length){msg('ใช้เลขยังไม่ครบทุกตัว');return}
+ let v=null;try{v=ev(root)}catch(e){}
+ if(v!==null&&Math.abs(v-target)<1e-9){score++;$('score').textContent=score+' ข้อ';msg('ถูกต้อง! เก่งมาก');locked=true;setTimeout(newQ,800)}
+ else msg('ยังไม่ใช่ ลองใหม่นะ');
+};
+const bot=$('new').parentNode;
+bot.style.gridTemplateColumns='repeat(3,1fr)';
+bot.innerHTML='<button class="k" id="nq">สุ่มโจทย์ใหม่</button><button class="k" id="hp">วิธีทำ</button><button class="k" id="rs">รีเซ็ต</button>';
+const hp=document.createElement('div');hp.className='help';hp.hidden=true;
+hp.innerHTML='Σ: กด Σ แล้วแตะช่องเพื่อเลือกใส่ ค่าเริ่มของ i, ค่าสุดท้าย หรือสมการในวงเล็บ (ปุ่ม i ใช้ได้เฉพาะในวงเล็บ) และแตะที่เทปส่วนอื่นเพื่อกลับไปเขียนนอก Σ · √ ใส่หน้าเลขหรือวงเล็บ · ! ใช้กับ 0–10 (ห้าม !! ต้องเขียน (n!)!) · ^ ยกกำลัง (เลขชี้กำลังเป็นจำนวนเต็ม −10 ถึง 10 ทำก่อน × +) · ⌫ จะลบ Σ ทีละส่วนข้างใน และลบทั้งก้อนเมื่อว่างเปล่า';
+bot.parentNode.insertBefore(hp,bot.nextSibling);
+$('nq').onclick=newQ;function steps(ns){
+ const t=[];for(let i=0;i<ns.length;i++){const x=ns[i];if(x.k==='d'){let s=x.v;while(ns[i+1]&&ns[i+1].k==='d')s+=ns[++i].v;t.push(+s)}else t.push(x.v)}
+ const show=a=>a.join(' ');const out=[show(t)];
+ const ap=(a,o,b)=>{const r=o==='+'?a+b:o==='−'?a-b:o==='×'?a*b:o==='÷'?a/b:a**b;return Math.round(r*1e6)/1e6};
+ while(t.length>1){
+  let i=-1;
+  for(let j=t.length-2;j>=1;j-=2){if(t[j]==='^'){i=j;break}}
+  if(i<0)i=t.findIndex((x,j)=>j%2===1&&(x==='×'||x==='÷'));
+  if(i<0)i=1;
+  t.splice(i-1,3,ap(t[i-1],t[i],t[i+1]));out.push(show(t));
+ }
+ return out}
+function showSol(){
+ let ov=document.getElementById('sol');if(ov)ov.remove();
+ ov=document.createElement('div');ov.id='sol';
+ const body=sol?steps(sol).map((s,i)=>'<div class="st">'+(i?'= ':'')+s+'</div>').join(''):'<div class="st">ข้อนี้ยังไม่มีเฉลยแบบแสดงขั้นตอน</div>';
+ ov.innerHTML='<div class="solc"><div class="solh">วิธีคิดข้อนี้</div><div class="sols">ใช้เลข '+digits.join(' · ')+' ให้ได้ '+target+'</div>'+body+'<button class="solb" id="solx">เข้าใจแล้ว</button></div>';
+ ov.onclick=e=>{if(e.target===ov||e.target.id==='solx')ov.remove()};
+ document.body.appendChild(ov)}
+$('hp').onclick=showSol;
+$('rs').onclick=()=>{score=0;$('score').textContent='0 ข้อ';newQ()};
+setInterval(()=>{if(time===0&&!locked){locked=true;msg('หมดเวลา! สุ่มโจทย์ใหม่ให้แล้ว');setTimeout(newQ,1500)}},300);
+newQ();
+})();
+(function(){
+const D='#1f1b55';
+const mk=(vb,inner,st=D)=>`<svg viewBox='${vb}' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='${st}' stroke-width='2' stroke-linejoin='round' stroke-linecap='round'>${inner}</svg>`;
+const P='M12 1.5C13 8 16 11 22.5 12 16 13 13 16 12 22.5 11 16 8 13 1.5 12 8 11 11 8 12 1.5z';
+const face=(y=0)=>`<g transform='translate(0 ${y})'><circle cx='8.6' cy='11' r='1.2' fill='${D}' stroke='none'/><circle cx='15.4' cy='11' r='1.2' fill='${D}' stroke='none'/><path d='M10.6 13.6q1.4 1.4 2.8 0' stroke-width='1.5'/><circle cx='6.3' cy='13.2' r='1.3' fill='#ff9bb8' stroke='none' opacity='.8'/><circle cx='17.7' cy='13.2' r='1.3' fill='#ff9bb8' stroke='none' opacity='.8'/></g>`;
+const I={
+ bow:(c,s)=>mk('0 0 48 36',`<path d='M21 21 13 33l8-2 3 4 3-4 8 2-8-12z' fill='${c}'/><path d='M24 18C16 3 4 4 3 12c-1 9 9 12 21 6z' fill='${c}'/><path d='M24 18C32 3 44 4 45 12c1 9-9 12-21 6z' fill='${c}'/><path d='M10 10q4-3 8 1' stroke='#fff' stroke-width='2' opacity='.8'/><circle cx='24' cy='18' r='4.5' fill='${c}'/>`,s),
+ sparkle:(c,s)=>mk('0 0 24 24',`<path d='${P}' fill='${c}'/>`,s),
+ heart:(c,s)=>mk('0 0 24 24',`<path d='M12 21.5C4 15.5 1.5 11.5 1.5 7.8a5.3 5.3 0 0 1 10.5-1 5.3 5.3 0 0 1 10.5 1c0 3.7-2.5 7.7-10.5 13.7z' fill='${c}'/>`+face(-1),s),
+ star:(c,s)=>mk('0 0 24 24',`<path d='M12 1.8 15 8.4l7.2.8-5.4 4.8 1.6 7.1L12 17.4 5.6 21.1l1.6-7.1L1.8 9.2 9 8.4z' fill='${c}'/>`+face(.5),s),
+ clover:(c,s)=>mk('0 0 24 24',`<path d='M12 13c0 4 1 6.5 4 8.5'/><circle cx='8' cy='8' r='5' fill='${c}'/><circle cx='16' cy='8' r='5' fill='${c}'/><circle cx='8' cy='15' r='5' fill='${c}'/><circle cx='16' cy='15' r='5' fill='${c}'/><circle cx='12' cy='11.5' r='4' fill='${c}' stroke='none'/>`,s),
+ leaf:(c,s)=>mk('0 0 24 24',`<path d='M3.5 20.5C3 9.5 10.5 3 21 3c.5 11-6 18.5-17.5 17.5z' fill='${c}'/><path d='M3.5 20.5 15 9'/>`,s),
+ cloud:(c,s)=>mk('0 0 26 24',`<path d='M7 20a5.2 5.2 0 0 1-.6-10.3 7 7 0 0 1 13.4-1.4A5.2 5.2 0 0 1 19.5 20z' fill='${c}'/><g transform='translate(1 3)'>${face(0)}</g>`,s),
+ gem:(c,s)=>mk('0 0 24 24',`<path d='M12 2.5 21 9.5 12 21.5 3 9.5z' fill='${c}'/><path d='M3 9.5h18M8 9.5l4-7 4 7M8 9.5l4 12 4-12' stroke-width='1.5'/>`,s),
+ flame:(c,s)=>mk('0 0 24 24',`<path d='M12 1.5c1 5 7 8 7 14a7 7 0 0 1-14 0c0-3 2-5 3-7 1 2 2 3 3 3 0-4-1-6 1-10z' fill='${c}'/><path d='M12 22a3.6 3.6 0 0 1-3.6-3.6c0-2 2-3 3.6-6 1.6 3 3.6 4 3.6 6A3.6 3.6 0 0 1 12 22z' fill='#ffe58a' stroke='none'/>`,s),
+ mail:(c,s)=>mk('0 0 26 20',`<rect x='1.5' y='1.5' width='23' height='17' rx='3.5' fill='${c}'/><path d='M2.5 4.5 13 12.5 23.5 4.5'/>`,s)
+};
+C.fact.dc=[I.clover('#7bd88f'),I.leaf('#4cc27e'),I.star('#ffd75e')];
+C.sigma.dc=[I.bow('#ff7aa8'),I.heart('#ff8fb8'),I.sparkle('#ffe27a')];
+C.root.dc=[I.cloud('#bfe0ff'),I.gem('#6db6ff'),I.sparkle('#b9f0ff')];
+C.pow.dc=[I.flame('#ff9a3c'),I.star('#ffd75e'),I.heart('#ffb36b')];
+const U=s=>`url('data:image/svg+xml,${encodeURIComponent(s).replace(/'/g,'%27')}')`;
+const pair=mk('0 0 58 24',`<g transform='translate(0 3) scale(.75)'><path d='${P}' fill='#ffd1e3'/></g><g transform='translate(34 0) scale(.5)'><path d='${P}' fill='#ffe27a'/></g>`,'none');
+const st=document.createElement('style');
+st.textContent=`
+h1::before{content:'';display:inline-block;width:34px;height:26px;margin-right:8px;vertical-align:-5px;background:${U(I.bow('#ff7aa8'))} center/contain no-repeat}
+.left::after{content:'';width:30px;height:30px;top:-15px;right:26px;background:${U(I.sparkle('#ffd75e'))} center/contain no-repeat}
+.tag::after{content:'';width:58px;height:24px;right:14px;top:6px;letter-spacing:0;background:${U(pair)} center/contain no-repeat}
+.go::before{content:'';display:inline-block;width:26px;height:20px;margin-right:8px;vertical-align:-4px;background:${U(I.mail('#fff','#8f2250'))} center/contain no-repeat}
+.hd svg{width:44px;height:44px;flex:none}
+.fl svg{width:32px;height:32px}
+`;
+document.body.appendChild(st);
+})();
+</script></body></html>
